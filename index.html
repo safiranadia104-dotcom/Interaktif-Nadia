@@ -1,0 +1,3511 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kolaborasi Manusia dan KA</title>
+    <style>
+      :root {
+        --bg: #060a22;
+        --bg2: #0d1440;
+        --card: rgba(255, 255, 255, 0.06);
+        --line: rgba(120, 160, 255, 0.28);
+        --cyan: #22d3ee;
+        --purple: #8b5cf6;
+        --pink: #f472b6;
+        --yellow: #fbbf24;
+        --text: #e8edff;
+        --muted: #9fb0e0;
+        --ok: #22c55e;
+        --bad: #ef4444;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        color: var(--text);
+        background-color: #060a22;
+        background:
+          radial-gradient(circle at 15% 10%, rgba(139, 92, 246, 0.28), transparent 45%),
+          radial-gradient(circle at 90% 90%, rgba(34, 211, 238, 0.2), transparent 45%),
+          linear-gradient(160deg, #060a22, #0d1440);
+        background-attachment: fixed;
+      }
+      .app {
+        height: 100vh;
+        height: 100dvh;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+      }
+      .brand {
+        font-weight: 700;
+      }
+      .counter {
+        color: var(--muted);
+      }
+      .progress {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      #progressBar {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--cyan), var(--purple));
+        transition: width 0.4s ease;
+      }
+      .stage {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+      }
+      .slide {
+        position: absolute;
+        inset: 0;
+        padding: 22px 28px 20px;
+        overflow-y: auto;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(40px);
+        transition:
+          opacity 0.35s ease,
+          transform 0.35s ease,
+          visibility 0.35s;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .slide.before {
+        transform: translateX(-40px);
+      }
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+      }
+      .slide:has(> .split:only-child) {
+        justify-content: center;
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        line-height: 1.1;
+        margin: 10px 0;
+      }
+      h2 {
+        font-size: clamp(1.4rem, 3.2vw, 2.3rem);
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1.05rem;
+        margin-bottom: 6px;
+      }
+      p {
+        line-height: 1.55;
+      }
+      ul {
+        padding-left: 20px;
+        line-height: 1.6;
+      }
+      a {
+        color: var(--cyan);
+      }
+      .lead {
+        color: var(--muted);
+        font-size: 1.03rem;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 12px;
+      }
+      .label {
+        color: var(--cyan);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+      }
+      .grad {
+        color: #22d3ee;
+        background: linear-gradient(90deg, #22d3ee, #8b5cf6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .badge,
+      .sec {
+        display: inline-block;
+        align-self: flex-start;
+        padding: 5px 12px;
+        border-radius: 999px;
+        background: rgba(139, 92, 246, 0.25);
+        border: 1px solid var(--purple);
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+      .sec {
+        background: rgba(34, 211, 238, 0.12);
+        border-color: var(--cyan);
+        color: var(--cyan);
+      }
+      .split {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 24px;
+        align-items: center;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .three {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+      .list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      /* ---------- Karakter kartun ---------- */
+      .ch {
+        display: inline-block;
+        width: clamp(80px, 13vw, 140px);
+        flex: none;
+      }
+      .ch svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.4));
+      }
+      .ch.flipx svg {
+        transform: scaleX(-1);
+      }
+      .ch.tilt {
+        transform: rotate(-6deg);
+      }
+      .ch.b2 svg {
+        filter: hue-rotate(140deg) drop-shadow(0 8px 14px rgba(0, 0, 0, 0.4));
+      }
+      .scene {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 6px;
+        min-height: 200px;
+        padding: 10px;
+      }
+      .scene::before {
+        content: "";
+        position: absolute;
+        inset: 6% 4%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.45), rgba(34, 211, 238, 0.12) 60%, transparent 72%);
+        z-index: 0;
+      }
+      .scene > * {
+        position: relative;
+        z-index: 1;
+      }
+      .scene .ch {
+        width: clamp(90px, 15vw, 160px);
+        animation: float 3.4s ease-in-out infinite;
+      }
+      .scene .ch + .ch {
+        animation-delay: 1.1s;
+      }
+      .scene .props {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .props span {
+        position: absolute;
+        font-size: 2rem;
+        animation: float 3s ease-in-out infinite;
+      }
+      .city {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 70%;
+        z-index: 0;
+        opacity: 0.9;
+      }
+      @keyframes float {
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+      .bubble {
+        position: relative;
+        background: #eef2ff;
+        color: #14204f;
+        border-radius: 16px;
+        padding: 10px 14px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        line-height: 1.4;
+        max-width: 420px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+      }
+      .bubble::before {
+        content: "";
+        position: absolute;
+        left: -9px;
+        bottom: 16px;
+        border: 9px solid transparent;
+        border-right-color: #eef2ff;
+        border-left: 0;
+      }
+      .tip {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        margin-top: auto;
+      }
+      .tip .ch {
+        width: 70px;
+      }
+      .tip.r {
+        flex-direction: row-reverse;
+        align-self: flex-end;
+      }
+      .tip.r .bubble::before {
+        left: auto;
+        right: -9px;
+        border-right: 0;
+        border-left: 9px solid #eef2ff;
+        border-left-color: #eef2ff;
+        border-right-color: transparent;
+      }
+
+      /* ---------- Komponen ---------- */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px 16px;
+      }
+      .card.alt {
+        border-color: rgba(139, 92, 246, 0.5);
+        background: rgba(139, 92, 246, 0.1);
+      }
+      .card.warm {
+        border-color: rgba(251, 191, 36, 0.5);
+        background: rgba(251, 191, 36, 0.08);
+      }
+      .meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 14px;
+        font-size: 0.9rem;
+      }
+      .meta b {
+        color: var(--cyan);
+        display: inline-block;
+        min-width: 80px;
+      }
+      .callout {
+        border-left: 4px solid var(--cyan);
+        background: rgba(34, 211, 238, 0.08);
+        padding: 12px 16px;
+        border-radius: 0 12px 12px 0;
+        font-weight: 600;
+        font-size: 1.03rem;
+      }
+      .callout.big {
+        font-size: 1.4rem;
+        margin: 14px 0;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .chip {
+        padding: 7px 14px;
+        border-radius: 999px;
+        background: rgba(34, 211, 238, 0.1);
+        border: 1px solid var(--line);
+        font-size: 0.9rem;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: var(--card);
+        border: 1px solid var(--line);
+      }
+      .ico {
+        font-size: 1.5rem;
+      }
+      .clickable,
+      .flip,
+      .expand,
+      .check-step {
+        cursor: pointer;
+        transition:
+          transform 0.15s,
+          border-color 0.2s,
+          background 0.2s,
+          box-shadow 0.2s;
+        user-select: none;
+      }
+      .clickable:hover,
+      .expand:hover,
+      .check-step:hover {
+        transform: translateY(-2px);
+        border-color: var(--cyan);
+      }
+      .clickable.active {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.18);
+        box-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+      }
+      :focus-visible {
+        outline: 2px solid var(--cyan);
+        outline-offset: 2px;
+      }
+      .info-box {
+        border: 1px dashed var(--cyan);
+        border-radius: 14px;
+        padding: 14px 16px;
+        background: rgba(34, 211, 238, 0.06);
+        min-height: 84px;
+      }
+      .info-box h4 {
+        color: var(--cyan);
+        margin-bottom: 4px;
+      }
+      .info-box.filled {
+        border-style: solid;
+        animation: pop 0.3s ease;
+      }
+      @keyframes pop {
+        from {
+          transform: scale(0.97);
+          opacity: 0.6;
+        }
+      }
+      .steps {
+        display: grid;
+        gap: 12px;
+      }
+      .steps.four {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .steps.five {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      .step {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .step b {
+        font-size: 1.8rem;
+        color: var(--cyan);
+      }
+      .step p {
+        font-size: 0.9rem;
+      }
+      .step h3 {
+        font-size: 0.95rem;
+      }
+      .check-step.done {
+        border-color: var(--ok);
+        background: rgba(34, 197, 94, 0.15);
+      }
+      .check-step.done b::after {
+        content: " ✔";
+        color: var(--ok);
+      }
+      .check-step.row .box {
+        width: 26px;
+        height: 26px;
+        flex: none;
+        border-radius: 8px;
+        border: 2px solid var(--cyan);
+        display: grid;
+        place-items: center;
+        font-size: 0.9rem;
+      }
+      .check-step.row.done .box {
+        background: var(--ok);
+        border-color: var(--ok);
+        color: #04122a;
+      }
+      .check-step.row.done .box::after {
+        content: "✔";
+      }
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+      .flow .arrow {
+        color: var(--cyan);
+        font-weight: 800;
+      }
+      .quad-wrap {
+        display: flex;
+        gap: 8px;
+        align-items: stretch;
+      }
+      .axis-y {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.7rem;
+        color: var(--muted);
+      }
+      .axis-y b {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        color: var(--cyan);
+        letter-spacing: 2px;
+      }
+      .axis-x {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-top: 6px;
+        gap: 6px;
+      }
+      .axis-x b {
+        color: var(--cyan);
+        letter-spacing: 1px;
+      }
+      .quad {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .q {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 8px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .q b {
+        font-size: 1.6rem;
+        color: var(--cyan);
+      }
+      .q small {
+        color: var(--purple);
+        font-weight: 700;
+        font-size: 0.7rem;
+      }
+      .q span {
+        font-size: 0.8rem;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .tab {
+        padding: 9px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--text);
+        font-size: 0.92rem;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .tab.active {
+        background: linear-gradient(90deg, var(--cyan), var(--purple));
+        border-color: transparent;
+        font-weight: 700;
+        color: #04122a;
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+        animation: pop 0.3s ease;
+      }
+      .flip-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+      .flip {
+        perspective: 900px;
+        height: 190px;
+      }
+      .flip-in {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+      }
+      .flip.flipped .flip-in {
+        transform: rotateY(180deg);
+      }
+      .face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 8px;
+      }
+      .face.front {
+        background: #121a4a;
+      }
+      .face.back {
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.35), rgba(139, 92, 246, 0.4)), #121a4a;
+        transform: rotateY(180deg);
+        font-weight: 600;
+      }
+      .face .ico {
+        font-size: 2.2rem;
+      }
+      .expand .detail {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition:
+          max-height 0.4s,
+          opacity 0.3s,
+          margin 0.3s;
+      }
+      .expand.open {
+        border-color: var(--cyan);
+      }
+      .expand.open .detail {
+        max-height: 700px;
+        opacity: 1;
+        margin-top: 8px;
+      }
+      .expand h3::after {
+        content: " ＋";
+        color: var(--cyan);
+      }
+      .expand.open h3::after {
+        content: " －";
+      }
+      .btn {
+        align-self: flex-start;
+        margin-top: 14px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 999px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: #04122a;
+        background: linear-gradient(90deg, var(--cyan), var(--purple));
+        transition:
+          transform 0.15s,
+          box-shadow 0.2s;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 211, 238, 0.35);
+      }
+      .btn.ghost {
+        background: transparent;
+        border: 1px solid var(--cyan);
+        color: var(--text);
+      }
+      .result .btn {
+        align-self: center;
+      }
+      .btn.sm {
+        margin-top: 0;
+        padding: 9px 18px;
+        font-size: 0.9rem;
+      }
+      .lnk {
+        display: inline-block;
+        margin: 4px 6px 4px 0;
+        padding: 6px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: rgba(34, 211, 238, 0.08);
+        font-size: 0.85rem;
+        text-decoration: none;
+      }
+      .lnk:hover {
+        border-color: var(--cyan);
+      }
+      .tbl {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+      }
+      .tbl th,
+      .tbl td {
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      .tbl th {
+        background: rgba(34, 211, 238, 0.12);
+        color: var(--cyan);
+      }
+      textarea {
+        width: 100%;
+        min-height: 64px;
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        font: inherit;
+        resize: vertical;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 20px;
+      }
+      .nav {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--text);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.2s;
+        flex: none;
+      }
+      .nav:hover:not(:disabled) {
+        background: var(--cyan);
+        color: #04122a;
+      }
+      .nav:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+      #jump {
+        flex: 1;
+        max-width: 520px;
+        padding: 11px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: #101845;
+        color: var(--text);
+        font-size: 0.92rem;
+      }
+      #quiz,
+      #game {
+        max-width: 760px;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .q-top {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .q-bar {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      .q-bar div {
+        height: 100%;
+        background: linear-gradient(90deg, var(--cyan), var(--purple));
+        transition: width 0.3s;
+      }
+      .q-text {
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1.35;
+      }
+      .options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .opt {
+        text-align: left;
+        padding: 13px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--text);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .opt:hover:not(:disabled) {
+        border-color: var(--cyan);
+        transform: translateX(4px);
+      }
+      .opt .key {
+        width: 28px;
+        height: 28px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(34, 211, 238, 0.2);
+        font-weight: 700;
+        font-size: 0.85rem;
+      }
+      .opt.correct {
+        border-color: var(--ok);
+        background: rgba(34, 197, 94, 0.18);
+      }
+      .opt.wrong {
+        border-color: var(--bad);
+        background: rgba(239, 68, 68, 0.18);
+      }
+      .opt:disabled {
+        cursor: default;
+      }
+      .feedback {
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+      }
+      .feedback.ok {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid var(--ok);
+      }
+      .feedback.no {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid var(--bad);
+      }
+      .result {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .score-ring {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 2.6rem;
+        font-weight: 800;
+        background:
+          radial-gradient(circle, #060a22 58%, transparent 59%),
+          conic-gradient(var(--cyan) var(--pct), rgba(255, 255, 255, 0.1) 0);
+      }
+      .review {
+        width: 100%;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .review .card {
+        font-size: 0.9rem;
+      }
+      .review .ok-t {
+        color: var(--ok);
+      }
+      .review .no-t {
+        color: var(--bad);
+      }
+      @media (max-width: 860px) {
+        .split,
+        .two,
+        .three {
+          grid-template-columns: 1fr;
+        }
+        .steps.four,
+        .steps.five {
+          grid-template-columns: 1fr 1fr;
+        }
+        .flip-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .slide {
+          padding: 16px 14px;
+        }
+        .scene {
+          min-height: 150px;
+        }
+        .tbl {
+          font-size: 0.82rem;
+        }
+      }
+      @media (max-width: 480px) {
+        .steps.four,
+        .steps.five {
+          grid-template-columns: 1fr;
+        }
+        .flip-grid {
+          grid-template-columns: 1fr;
+        }
+        .flip {
+          height: 150px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============ Definisi karakter kartun (SVG) ============ -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <symbol id="robot" viewBox="0 0 120 150">
+          <path d="M60 22V10" stroke="#b9c6ff" stroke-width="4" stroke-linecap="round" />
+          <circle cx="60" cy="8" r="7" fill="#22d3ee" />
+          <rect x="20" y="22" width="80" height="64" rx="30" fill="#f4f7ff" stroke="#9fb0ff" stroke-width="3" />
+          <rect x="31" y="36" width="58" height="36" rx="17" fill="#0b1235" />
+          <circle cx="47" cy="52" r="6" fill="#22d3ee" />
+          <circle cx="73" cy="52" r="6" fill="#22d3ee" />
+          <circle cx="49" cy="50" r="2" fill="#fff" />
+          <circle cx="75" cy="50" r="2" fill="#fff" />
+          <path d="M50 62q10 8 20 0" stroke="#22d3ee" stroke-width="3" fill="none" stroke-linecap="round" />
+          <circle cx="14" cy="54" r="8" fill="#8b5cf6" />
+          <circle cx="106" cy="54" r="8" fill="#8b5cf6" />
+          <rect x="32" y="90" width="56" height="42" rx="18" fill="#f4f7ff" stroke="#9fb0ff" stroke-width="3" />
+          <rect x="45" y="99" width="30" height="20" rx="7" fill="#8b5cf6" />
+          <text
+            x="60"
+            y="114"
+            text-anchor="middle"
+            font-size="13"
+            font-weight="800"
+            fill="#fff"
+            font-family="Arial,sans-serif"
+          >
+            KA
+          </text>
+          <circle cx="24" cy="108" r="9" fill="#f4f7ff" stroke="#9fb0ff" stroke-width="3" />
+          <circle cx="96" cy="108" r="9" fill="#f4f7ff" stroke="#9fb0ff" stroke-width="3" />
+          <rect x="40" y="132" width="16" height="14" rx="6" fill="#8b5cf6" />
+          <rect x="64" y="132" width="16" height="14" rx="6" fill="#8b5cf6" />
+        </symbol>
+        <symbol id="kid" viewBox="0 0 120 150">
+          <path d="M18 150Q18 98 60 98Q102 98 102 150Z" fill="#1e2a78" />
+          <path d="M42 98Q60 120 78 98Z" fill="#2f40b5" />
+          <rect x="53" y="84" width="14" height="16" rx="6" fill="#f5c9a0" />
+          <circle cx="60" cy="56" r="30" fill="#ffd9b8" />
+          <path d="M29 56Q26 20 62 21Q96 22 91 56Q84 36 62 38Q42 38 29 56Z" fill="#1a1a1a" />
+          <ellipse cx="48" cy="60" rx="4" ry="5" fill="#1a1a1a" />
+          <ellipse cx="72" cy="60" rx="4" ry="5" fill="#1a1a1a" />
+          <circle cx="49.5" cy="58" r="1.6" fill="#fff" />
+          <circle cx="73.5" cy="58" r="1.6" fill="#fff" />
+          <path d="M50 72q10 9 20 0" stroke="#b5483a" stroke-width="3" fill="none" stroke-linecap="round" />
+          <circle cx="39" cy="70" r="5" fill="#ff9d9d" opacity=".55" />
+          <circle cx="81" cy="70" r="5" fill="#ff9d9d" opacity=".55" />
+        </symbol>
+        <symbol id="girl" viewBox="0 0 120 150">
+          <path d="M18 150Q18 98 60 98Q102 98 102 150Z" fill="#a21caf" />
+          <path d="M42 98Q60 120 78 98Z" fill="#d946ef" />
+          <circle cx="20" cy="62" r="13" fill="#5b3a1e" />
+          <circle cx="100" cy="62" r="13" fill="#5b3a1e" />
+          <rect x="53" y="84" width="14" height="16" rx="6" fill="#e9ad82" />
+          <circle cx="60" cy="56" r="30" fill="#f2b98f" />
+          <path d="M29 58Q22 18 62 20Q98 20 91 58Q84 34 62 38Q40 36 29 58Z" fill="#5b3a1e" />
+          <circle cx="30" cy="40" r="5" fill="#f472b6" />
+          <circle cx="90" cy="40" r="5" fill="#f472b6" />
+          <ellipse cx="48" cy="60" rx="4" ry="5" fill="#2a1a10" />
+          <ellipse cx="72" cy="60" rx="4" ry="5" fill="#2a1a10" />
+          <circle cx="49.5" cy="58" r="1.6" fill="#fff" />
+          <circle cx="73.5" cy="58" r="1.6" fill="#fff" />
+          <path d="M50 72q10 9 20 0" stroke="#b5483a" stroke-width="3" fill="none" stroke-linecap="round" />
+          <circle cx="39" cy="70" r="5" fill="#ff8a8a" opacity=".5" />
+          <circle cx="81" cy="70" r="5" fill="#ff8a8a" opacity=".5" />
+        </symbol>
+      </defs>
+    </svg>
+
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">🤖 Kolaborasi Manusia &amp; KA</div>
+        <div class="counter" id="counter">1 / 36</div>
+      </header>
+      <div class="progress"><div id="progressBar"></div></div>
+
+      <main class="stage" id="stage">
+        <!-- 1. SAMPUL -->
+        <section class="slide active" data-title="Sampul">
+          <div class="split">
+            <div>
+              <span class="badge">Koding dan Kecerdasan Artifisial</span>
+              <h1>Kolaborasi <span class="grad">Manusia</span> dan <span class="grad">KA</span></h1>
+              <p class="lead">Materi interaktif: klik, jelajahi, mainkan, lalu uji pemahamanmu lewat kuis di akhir.</p>
+              <button class="btn" data-go="next">Mulai Belajar →</button>
+              <p class="hint">Gunakan tombol panah, keyboard ← →, menu loncat di bawah, atau geser layar.</p>
+            </div>
+            <div class="scene" style="min-height: 260px">
+              <svg class="city" viewBox="0 0 300 160" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+                <g fill="#1a2a7a">
+                  <rect x="8" y="80" width="40" height="80" rx="3" />
+                  <rect x="58" y="50" width="46" height="110" rx="3" />
+                  <rect x="112" y="90" width="36" height="70" rx="3" />
+                  <rect x="158" y="40" width="50" height="120" rx="3" />
+                  <rect x="216" y="70" width="38" height="90" rx="3" />
+                  <rect x="258" y="96" width="34" height="64" rx="3" />
+                </g>
+                <g fill="#22d3ee" opacity=".85">
+                  <rect x="66" y="60" width="8" height="8" />
+                  <rect x="84" y="60" width="8" height="8" />
+                  <rect x="66" y="80" width="8" height="8" />
+                  <rect x="84" y="100" width="8" height="8" />
+                  <rect x="168" y="52" width="8" height="8" />
+                  <rect x="188" y="72" width="8" height="8" />
+                  <rect x="168" y="92" width="8" height="8" />
+                  <rect x="188" y="112" width="8" height="8" />
+                  <rect x="18" y="92" width="8" height="8" />
+                  <rect x="224" y="82" width="8" height="8" />
+                  <rect x="266" y="108" width="8" height="8" />
+                </g>
+                <g fill="#f472b6" opacity=".85">
+                  <rect x="84" y="80" width="8" height="8" />
+                  <rect x="168" y="72" width="8" height="8" />
+                  <rect x="188" y="92" width="8" height="8" />
+                  <rect x="122" y="104" width="8" height="8" />
+                  <rect x="236" y="100" width="8" height="8" />
+                </g>
+              </svg>
+              <i class="ch kid"></i
+              ><span style="font-size: 2.4rem; align-self: center; animation: float 2.4s infinite">🤝</span
+              ><i class="ch robot"></i>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. JUDUL -->
+        <section class="slide" data-title="Judul">
+          <div class="split">
+            <div>
+              <h2>
+                Kreasi Konten Digital dengan Kolaborasi Manusia dan <span class="grad">Kecerdasan Artifisial (KA)</span>
+              </h2>
+              <p class="lead">Koding dan Kecerdasan Artifisial (KKA)<br />Kelas XI SMA-MA Fase F</p>
+              <div class="card meta">
+                <div><b>Penyusun</b><span>Nadia Safira, NIM 250212087</span></div>
+                <div><b>Penulis</b><span>Hiang Budiocsa, Subandi, Windy Anindya Purba</span></div>
+                <div><b>Penerbit</b><span>Pusat Kurikulum dan Pembelajaran, BSKAP, Kemendikbudristek</span></div>
+              </div>
+            </div>
+            <div class="scene">
+              <i class="ch kid"></i><i class="ch robot"></i>
+              <div class="props">
+                <span style="left: 6%; top: 6%">🎬</span
+                ><span style="right: 8%; top: 2%; animation-delay: 0.6s">🖼️</span
+                ><span style="right: 2%; top: 46%; animation-delay: 1.2s">💬</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. APERSEPSI -->
+        <section class="slide" data-title="Apersepsi & Tujuan">
+          <h2>Apersepsi dan <span class="grad">Tujuan Pembelajaran</span></h2>
+          <p class="lead">
+            Di era digital, kolaborasi manusia dan KA membuka peluang kreasi konten yang lebih cepat, relevan, dan
+            berdampak.
+          </p>
+          <div class="split">
+            <div class="list">
+              <p class="label">Tujuan Pembelajaran (klik untuk detail)</p>
+              <div
+                class="clickable row"
+                data-label="Menganalisis peran manusia dan KA"
+                data-info="Kamu mampu membedakan bagian pekerjaan yang paling tepat dikerjakan manusia dan yang bisa dibantu oleh KA."
+              >
+                <span class="ico">👥</span>Menganalisis peran manusia dan KA
+              </div>
+              <div
+                class="clickable row"
+                data-label="Memanfaatkan alat KA multimedia"
+                data-info="Menggunakan alat KA untuk teks, gambar, video, dan audio secara tepat guna."
+              >
+                <span class="ico">🎬</span>Memanfaatkan alat KA multimedia
+              </div>
+              <div
+                class="clickable row"
+                data-label="Merancang prompt presisi"
+                data-info="Menulis perintah (prompt) yang jelas, spesifik, dan kontekstual agar hasil KA sesuai kebutuhan."
+              >
+                <span class="ico">💬</span>Merancang prompt presisi
+              </div>
+              <div
+                class="clickable row"
+                data-label="Menerapkan etika digital dan lisensi"
+                data-info="Menghargai hak cipta, menyebutkan sumber, dan memahami lisensi karya yang digunakan."
+              >
+                <span class="ico">⚖️</span>Menerapkan etika digital dan lisensi
+              </div>
+              <div
+                class="clickable row"
+                data-label="Menyebarluaskan konten sesuai target"
+                data-info="Memilih platform dan gaya bahasa yang cocok dengan audiens sasaran."
+              >
+                <span class="ico">📣</span>Menyebarluaskan konten sesuai target
+              </div>
+            </div>
+            <div>
+              <div class="info-box">
+                <h4 class="info-title">Klik salah satu tujuan</h4>
+                <p class="info-text">Penjelasan singkat akan muncul di sini.</p>
+              </div>
+              <div class="scene" style="min-height: 170px"><i class="ch girl"></i><i class="ch robot"></i></div>
+              <div class="callout">Kolaborasi <span class="grad">Manusia + KA</span> = Kreativitas Maksimal</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. KONSEP -->
+        <section class="slide" data-title="Konsep Kolaborasi">
+          <h2>Konsep <span class="grad">Kolaborasi</span> Manusia dan KA</h2>
+          <div class="steps four">
+            <div
+              class="clickable step"
+              data-label="01 · Manusia menentukan tujuan"
+              data-info="Tentukan pesan, audiens, dan hasil yang diharapkan sebelum memakai KA."
+            >
+              <b>01</b><span class="ico">🎯</span>
+              <p>Manusia menentukan tujuan</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="02 · KA membantu mengembangkan ide"
+              data-info="Minta KA menyarankan ide, struktur, atau draf awal sebagai bahan pengembangan."
+            >
+              <b>02</b><span class="ico">💡</span>
+              <p>KA membantu mengembangkan ide</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="03 · Manusia memeriksa dan menyempurnakan"
+              data-info="Periksa kebenaran isi, gaya bahasa, dan kesesuaian nilai sebelum konten dipakai."
+            >
+              <b>03</b><span class="ico">✅</span>
+              <p>Manusia memeriksa dan menyempurnakan</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="04 · Konten siap dibagikan"
+              data-info="Publikasikan ke platform yang tepat secara bertanggung jawab."
+            >
+              <b>04</b><span class="ico">📤</span>
+              <p>Konten siap dibagikan</p>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu langkah</h4>
+            <p class="info-text">Lihat apa yang dilakukan pada tiap tahap kolaborasi.</p>
+          </div>
+          <div class="callout">
+            <b>Manusia</b> memberi <span class="grad">arah, rasa, dan nilai</span>; <b>KA</b> membantu
+            <span class="grad">kecepatan dan efisiensi</span>.
+          </div>
+          <div class="tip">
+            <i class="ch robot"></i>
+            <div class="bubble">Alurnya berputar: kamu boleh mengulang langkah 2–3 sampai hasilnya pas!</div>
+          </div>
+        </section>
+
+        <!-- 5. SALING MELENGKAPI -->
+        <section class="slide" data-title="Saling Melengkapi">
+          <h2>Manusia dan KA: <span class="grad">Kekuatan yang Saling Melengkapi</span></h2>
+          <div class="two">
+            <div class="card">
+              <h3>👤 Manusia</h3>
+              <div class="chips">
+                <span
+                  class="clickable chip"
+                  data-label="Kreativitas"
+                  data-info="Kemampuan melahirkan gagasan orisinal dan sudut pandang baru."
+                  >kreativitas</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Empati"
+                  data-info="Memahami perasaan dan kebutuhan audiens sehingga pesan terasa tepat."
+                  >empati</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Intuisi"
+                  data-info="Naluri dan pertimbangan yang tidak selalu bisa dihitung dengan data."
+                  >intuisi</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Pemahaman konteks"
+                  data-info="Menangkap situasi sosial, waktu, dan tempat agar konten relevan."
+                  >pemahaman konteks</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Nilai budaya"
+                  data-info="Menjaga kepantasan dan kearifan budaya dalam setiap karya."
+                  >nilai budaya</span
+                >
+              </div>
+            </div>
+            <div class="card alt">
+              <h3>🤖 KA</h3>
+              <div class="chips">
+                <span
+                  class="clickable chip"
+                  data-label="Kecepatan"
+                  data-info="Menghasilkan draf dan opsi dalam hitungan detik."
+                  >kecepatan</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Ketepatan teknis"
+                  data-info="Menyelesaikan pekerjaan teknis seperti format, terjemahan, atau penyuntingan dengan cepat dan tepat."
+                  >ketepatan teknis</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Pengolahan data besar"
+                  data-info="Mengolah dan merangkum informasi dalam jumlah besar."
+                  >pengolahan data besar</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Otomatisasi"
+                  data-info="Mengerjakan tugas berulang secara otomatis."
+                  >otomatisasi</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Rekomendasi"
+                  data-info="Memberi saran berdasarkan pola data, misalnya ide atau waktu unggah."
+                  >rekomendasi</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu kekuatan</h4>
+            <p class="info-text">Penjelasan akan muncul di sini.</p>
+          </div>
+          <div class="callout">
+            Bukan siapa yang lebih hebat, <span class="grad">tetapi bagaimana keduanya bekerja bersama.</span>
+          </div>
+        </section>
+
+        <!-- 6. SIAP -->
+        <section class="slide" data-title="Siap Berkolaborasi?">
+          <div class="split">
+            <div>
+              <h2>Siap <span class="grad">Berkolaborasi?</span></h2>
+              <div class="callout big">Mari ciptakan konten digital yang berdampak dan bertanggung jawab!</div>
+              <p class="lead">
+                Selanjutnya, kita akan mempelajari kerja kolaboratif, teknik penyuntingan, etika, proyek, dan diseminasi
+                konten digital.
+              </p>
+              <button class="btn" data-go="next">Lanjut »</button>
+            </div>
+            <div class="scene">
+              <i class="ch girl"></i><i class="ch kid"></i><i class="ch robot"></i>
+              <div class="props">
+                <span style="left: 2%; top: 4%">🚀</span
+                ><span style="right: 4%; top: 0; animation-delay: 0.8s">⭐</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. SAMBUNGAN -->
+        <section class="slide" data-title="Sambungan Materi">
+          <div class="split">
+            <div>
+              <span class="badge">Sambungan Materi</span>
+              <h1>Kolaborasi Manusia dan KA <span class="grad">dalam Kreasi Konten Digital</span></h1>
+              <p class="lead">Kolaborasi manusia dan KA menggabungkan kreativitas dan kecepatan teknis.</p>
+              <button class="btn" data-go="next">Lanjut »</button>
+            </div>
+            <div class="scene">
+              <i class="ch kid"></i><i class="ch robot"></i>
+              <div class="props">
+                <span style="left: 4%; top: 8%">💻</span
+                ><span style="right: 6%; top: 6%; animation-delay: 0.7s">✨</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. KERJA KOLABORATIF -->
+        <section class="slide" data-title="Kerja Kolaboratif">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>Kerja Kolaboratif <span class="grad">Manusia dan KA</span></h2>
+          <p class="lead">Kekuatan berbeda, tujuan yang sama.</p>
+          <div class="two">
+            <div class="card">
+              <h3>👤 Manusia</h3>
+              <p>kreativitas, empati, nilai budaya, dan kemampuan memahami situasi</p>
+            </div>
+            <div class="card alt">
+              <h3>🤖 KA</h3>
+              <p>kecepatan, ketepatan teknis, dan kekuatan mengolah data dalam jumlah besar</p>
+            </div>
+          </div>
+          <p class="label">Kolaborasi nyata (klik contoh)</p>
+          <div class="chips">
+            <span
+              class="clickable chip"
+              data-label="Menulis artikel"
+              data-info="Manusia menentukan topik dan sudut pandang; KA menyusun kerangka dan draf; manusia menyunting hasilnya."
+              >✍️ menulis artikel</span
+            >
+            <span
+              class="clickable chip"
+              data-label="Mendesain poster"
+              data-info="Manusia menentukan pesan dan gaya; KA menghasilkan opsi visual; manusia memilih dan memoles."
+              >🖼️ mendesain poster</span
+            >
+            <span
+              class="clickable chip"
+              data-label="Membuat video pendek"
+              data-info="KA membantu naskah dan penyuntingan awal; manusia mengarahkan emosi dan pesan akhir."
+              >🎞️ membuat video pendek</span
+            >
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu contoh</h4>
+            <p class="info-text">Lihat bagaimana manusia dan KA berbagi peran.</p>
+          </div>
+          <div class="callout">Keputusan akhir dan nilai <span class="grad">tetap di tangan manusia</span></div>
+          <div class="tip r">
+            <i class="ch kid flipx"></i>
+            <div class="bubble">Hasil yang lahir bukan sekadar efisien, tetapi juga penuh makna.</div>
+          </div>
+        </section>
+
+        <!-- 9. APA ITU KOLABORASI -->
+        <section class="slide" data-title="Apa Itu Kolaborasi?">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>Apa Itu <span class="grad">Kolaborasi?</span></h2>
+          <div class="split">
+            <div>
+              <p class="lead">
+                Kamu pasti pernah bekerja dalam kelompok. Setiap anggota punya perannya masing-masing. Jika semua peran
+                dijalankan dengan baik dan saling melengkapi, hasilnya lebih maksimal daripada bekerja sendiri. Inilah
+                <b>kolaborasi</b>: kerja sama beberapa pihak dengan tujuan yang sama, meskipun perannya berbeda-beda.
+              </p>
+              <p class="label" style="margin-top: 12px">Klik peran dalam kelompok</p>
+              <div class="chips">
+                <span
+                  class="clickable chip"
+                  data-label="Pencatat"
+                  data-info="Mencatat hasil diskusi supaya tidak ada ide yang terlewat."
+                  >📝 pencatat</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Pencari data"
+                  data-info="Mengumpulkan data dan informasi pendukung dari berbagai sumber."
+                  >🔍 pencari data</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="Presenter"
+                  data-info="Menyampaikan hasil kerja kelompok di depan kelas."
+                  >🎤 presenter</span
+                >
+                <span
+                  class="clickable chip"
+                  data-label="KA, anggota baru!"
+                  data-info="Kini kolaborasi tidak hanya dengan temanmu, tetapi juga dengan mesin pintar untuk menyelesaikan tugas, menganalisis data, hingga memecahkan masalah."
+                  >🤖 KA: anggota baru!</span
+                >
+              </div>
+              <div class="info-box" style="margin-top: 12px">
+                <h4 class="info-title">Gambar 1.1 · Bekerja dalam Kelompok</h4>
+                <p class="info-text">Klik salah satu peran untuk melihat tugasnya.</p>
+              </div>
+            </div>
+            <div class="scene">
+              <i class="ch girl"></i><i class="ch kid"></i><i class="ch robot"></i>
+              <div class="props">
+                <span style="left: 0; top: 2%">📝</span
+                ><span style="left: 44%; top: -4%; animation-delay: 0.5s">💡</span
+                ><span style="right: 0; top: 6%; animation-delay: 1s">🎤</span>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            Hasil kerja kelompok yang saling melengkapi akan lebih maksimal daripada hasil kerja sendirian.
+          </div>
+        </section>
+
+        <!-- 10. KA PENGUAT -->
+        <section class="slide" data-title="KA Penguat Manusia">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>KA: <span class="grad">Penguat Kecerdasan Manusia</span></h2>
+          <div class="two">
+            <div class="card">
+              <h3>📈 McKinsey (2025)</h3>
+              <p>
+                Generative AI (GenAI) tidak lagi sekadar alat bantu, tetapi kekuatan besar yang mengubah cara kerja
+                organisasi, model bisnis, bahkan struktur perusahaan. Organisasi yang berhasil tidak hanya “menempelkan”
+                teknologi ini, tetapi membangun ulang proses kerjanya agar lebih efisien dan cerdas.
+              </p>
+            </div>
+            <div class="card alt">
+              <h3>🩺 Topol (2019)</h3>
+              <p>
+                KA bukanlah pengganti manusia, tetapi penguat dari kecerdasan manusia itu sendiri. KA unggul dalam
+                kecepatan dan data besar; manusia unggul dalam kreativitas, intuisi, dan pemahaman konteks.
+              </p>
+            </div>
+          </div>
+          <p class="label">Contoh KA sebagai penguat (klik)</p>
+          <div class="two">
+            <div
+              class="clickable card"
+              data-label="Dokter dan hasil MRI"
+              data-info="KA dapat membantu dokter membaca hasil MRI dengan cepat, tetapi keputusan akhir tetap di tangan dokter yang lebih memahami kondisi pasien secara menyeluruh."
+            >
+              <h3>🩻 Dokter &amp; MRI</h3>
+              <p>KA membaca cepat, dokter memutuskan.</p>
+            </div>
+            <div
+              class="clickable card"
+              data-label="Data cuaca dan evakuasi bencana"
+              data-info="KA dapat menganalisis data cuaca untuk evakuasi bencana, tetapi manusia yang menentukan langkah terbaik dengan mempertimbangkan faktor sosial dan budaya."
+            >
+              <h3>🌪️ Cuaca &amp; Evakuasi</h3>
+              <p>KA menganalisis, manusia menentukan langkah.</p>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu contoh</h4>
+            <p class="info-text">Penjelasan akan muncul di sini.</p>
+          </div>
+          <div class="tip">
+            <i class="ch robot"></i>
+            <div class="bubble">Aku cepat membaca data, tetapi keputusan akhirnya tetap padamu!</div>
+          </div>
+        </section>
+
+        <!-- 11. FUNGSI KA -->
+        <section class="slide" data-title="Untuk Apa KA?">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>Untuk Apa Saja <span class="grad">KA Digunakan?</span></h2>
+          <div class="steps five">
+            <div
+              class="clickable step"
+              data-label="1 · Mengotomatisasi tugas rutin"
+              data-info="Contoh: entri data atau pengecekan stok barang yang dikerjakan otomatis."
+            >
+              <b>1</b><span class="ico">⚙️</span>
+              <p>Mengotomatisasi tugas rutin</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="2 · Menganalisis dan memvisualkan data"
+              data-info="Menampilkan data dalam bentuk visual (grafik, diagram) yang mudah dipahami."
+            >
+              <b>2</b><span class="ico">📊</span>
+              <p>Menganalisis &amp; menampilkan data visual</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="3 · Memprediksi masalah"
+              data-info="KA dapat memperkirakan masalah sebelum benar-benar terjadi sehingga bisa dicegah."
+            >
+              <b>3</b><span class="ico">🔮</span>
+              <p>Memprediksi masalah sebelum terjadi</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="4 · Memberi rekomendasi"
+              data-info="Memberikan saran atau rekomendasi berdasarkan pola data."
+            >
+              <b>4</b><span class="ico">🎯</span>
+              <p>Memberi saran berdasarkan pola data</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="5 · Agen cerdas"
+              data-info="Bertindak sebagai agen cerdas yang dapat mengambil tindakan mandiri, tetapi hanya dalam batas tertentu."
+            >
+              <b>5</b><span class="ico">🦾</span>
+              <p>Agen cerdas yang bertindak mandiri (terbatas)</p>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu fungsi</h4>
+            <p class="info-text">Contoh penerapannya akan muncul di sini.</p>
+          </div>
+          <div class="callout">
+            KA bukan sekadar teknologi canggih, tetapi alat bantu yang membuat pekerjaan
+            <span class="grad">lebih efisien, cepat, dan cerdas.</span>
+          </div>
+          <div class="tip r">
+            <i class="ch girl flipx"></i>
+            <div class="bubble">Coba hitung: tugas rutin apa di sekolahmu yang bisa dibantu KA?</div>
+          </div>
+        </section>
+
+        <!-- 12. KONTEN -->
+        <section class="slide" data-title="KA Partner Konten">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>KA sebagai <span class="grad">Partner Konten Digital</span></h2>
+          <p class="lead">
+            Pernahkah kamu membuat desain, tulisan, atau video menggunakan teknologi? KA dapat menjadi partner yang
+            keren. Klik kartu untuk membukanya.
+          </p>
+          <div class="three">
+            <div class="expand card">
+              <h3>✍️ Menulis artikel</h3>
+              <div class="detail">
+                <p>
+                  KA membantu membuat draf tulisan, tetapi kamu yang menyempurnakan kaidah kebahasaannya agar mudah
+                  dibaca dan dipahami.
+                </p>
+              </div>
+            </div>
+            <div class="expand card alt">
+              <h3>🖼️ Mendesain poster</h3>
+              <div class="detail">
+                <p>KA memberi opsi visual dan ide tampilan; kamu yang memilih, menyesuaikan pesan, dan memolesnya.</p>
+              </div>
+            </div>
+            <div class="expand card">
+              <h3>🎞️ Membuat video pendek</h3>
+              <div class="detail">
+                <p>KA membantu menyusun naskah dan menyunting awal; kamu yang memastikan pesan dan emosinya tepat.</p>
+              </div>
+            </div>
+          </div>
+          <p class="label">Contoh di bidang jurnalistik</p>
+          <div class="two">
+            <div class="expand card warm">
+              <h3>📰 LIPI (2021)</h3>
+              <div class="detail">
+                <p>
+                  KA dapat menyusun berita dengan cepat berdasarkan data, tetapi wartawanlah yang menentukan berita mana
+                  yang penting dan layak tayang. Manusia tetap terpenting dalam memastikan kebenaran informasi.
+                </p>
+              </div>
+            </div>
+            <div class="expand card warm">
+              <h3>📱 Kominfo (2022)</h3>
+              <div class="detail">
+                <p>
+                  Semakin banyak orang dapat membuat konten dengan bantuan KA, tetapi tetap harus menggunakannya secara
+                  bijak dan bertanggung jawab.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="callout">Kreativitas manusia tetap yang <span class="grad">utama</span>.</div>
+        </section>
+
+        <!-- 13. AKTIVITAS 1.1 -->
+        <section class="slide" data-title="Aktivitas 1.1">
+          <span class="sec">Aktivitas 1.1 · Kelompok</span>
+          <h2>Menganalisis Kolaborasi Manusia dan KA <span class="grad">di Dunia Nyata</span></h2>
+          <p class="lead">
+            Simak video pendek tentang KA di bidang kesehatan, pendidikan, dan lapangan kerja. Aktifkan subtitle jika
+            diperlukan.
+          </p>
+          <div class="three">
+            <div class="card">
+              <h3>🏥 Video 1 · Kesehatan (±39 menit)</h3>
+              <p>
+                Perkembangan KA di sektor kesehatan: mendeteksi pola medis, mendukung dokter, serta tantangan etis dan
+                regulasi.
+              </p>
+              <a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1a"
+                >Buka video</a
+              >
+            </div>
+            <div class="card alt">
+              <h3>🎓 Video 2 · Pendidikan (±1 menit)</h3>
+              <p>
+                KA mengubah proses belajar-mengajar: personalisasi materi, adaptasi gaya belajar, dan peran guru di era
+                digital.
+              </p>
+              <a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1b"
+                >Buka video</a
+              >
+            </div>
+            <div class="card">
+              <h3>💼 Video 3 · Lapangan kerja (±1,5 menit)</h3>
+              <p>KA mengubah lanskap kerja di Indonesia: tantangan dan peluang bagi pelajar.</p>
+              <a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1c"
+                >Buka video</a
+              >
+            </div>
+          </div>
+          <p class="label">Petunjuk (klik untuk menandai selesai) · <span class="doneCount">0</span>/3</p>
+          <div class="list">
+            <div class="check-step row">
+              <span class="box"></span><span>Bentuklah kelompok yang terdiri atas 3–5 orang.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span
+                >Simak kembali video bersama kelompok, lalu diskusikan: (1) apa kelebihan dan kekurangan KA dalam
+                konteks tersebut? (2) peran apa yang tetap memerlukan manusia?</span
+              >
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Presentasikan hasil diskusi dengan membagi peran untuk masing-masing anggota.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 14. PRINSIP -->
+        <section class="slide" data-title="Prinsip, Risiko, Potensi">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>Menggunakan KA dengan <span class="grad">Prinsip yang Benar</span></h2>
+          <p class="lead">
+            Dalam buku <i>Human Compatible</i> (2019), Stuart Russell menyarankan prinsip penggunaan KA. Klik kartu
+            untuk membuka.
+          </p>
+          <div class="three">
+            <div class="expand card">
+              <h3>✅ Prinsip</h3>
+              <div class="detail">
+                <ul>
+                  <li>Selalu mengikuti dan menghormati tujuan manusia.</li>
+                  <li>Tidak diberi otonomi berlebihan tanpa memperhatikan nilai-nilai manusia.</li>
+                  <li>Terbuka terhadap masukan dan terus belajar dari manusia.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="expand card warm">
+              <h3>⚠️ Risiko jika diabaikan</h3>
+              <div class="detail">
+                <ul>
+                  <li>KA salah memahami keinginan manusia.</li>
+                  <li>Ketergantungan berlebihan membuat kita kurang kreatif dan kurang mandiri.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="expand card alt">
+              <h3>🌟 Potensi positif</h3>
+              <div class="detail">
+                <ul>
+                  <li>Memperkuat kemampuan manusia menghadapi tantangan global.</li>
+                  <li>
+                    Memperluas akses layanan pendidikan, kesehatan, dan publik, terutama di daerah yang sulit dijangkau.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="scene" style="min-height: 180px">
+            <i class="ch kid"></i><i class="ch robot"></i>
+            <div class="props">
+              <span style="left: 30%; top: 0">🛡️</span
+              ><span style="right: 28%; top: 6%; animation-delay: 0.9s">🌍</span>
+            </div>
+          </div>
+          <div class="callout">
+            KA yang digunakan dengan benar punya <span class="grad">potensi positif yang sangat besar.</span>
+          </div>
+        </section>
+
+        <!-- 15. MODEL FACTORY & ARTISAN -->
+        <section class="slide" data-title="Model Factory & Artisan">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>Dua Model Kolaborasi <span class="grad">(McKinsey, 2025)</span></h2>
+          <div class="tabs">
+            <button class="tab active" data-tab="mdl-f">🏭 Model Factory</button>
+            <button class="tab" data-tab="mdl-a">🎨 Model Artisan</button>
+            <button class="tab" data-tab="mdl-k">🤝 Kombinasi</button>
+          </div>
+          <div class="tab-panel card active" id="mdl-f">
+            <h3>Model Factory</h3>
+            <p>KA menangani tugas-tugas berulang dan massal, seperti:</p>
+            <ul>
+              <li>mengisi data otomatis;</li>
+              <li>memantau sistem; dan</li>
+              <li>memberikan rekomendasi cepat.</li>
+            </ul>
+            <p>Sangat cocok untuk pekerjaan teknis dan skala besar.</p>
+          </div>
+          <div class="tab-panel card alt" id="mdl-a">
+            <h3>Model Artisan</h3>
+            <p>
+              KA menjadi asisten bagi para profesional, seperti dokter, guru, atau desainer. Fungsinya mendukung
+              pengambilan keputusan dengan data dan wawasan, tetapi <b>keputusan akhir tetap di tangan manusia.</b>
+            </p>
+          </div>
+          <div class="tab-panel card warm" id="mdl-k">
+            <h3>Kombinasi keduanya = kerja tim yang hebat</h3>
+            <ul>
+              <li>KA unggul dalam hal skala dan kecepatan.</li>
+              <li>Manusia unggul dalam empati, etika, serta kreativitas.</li>
+            </ul>
+          </div>
+          <div class="scene" style="min-height: 190px">
+            <i class="ch robot"></i><span style="font-size: 2.2rem; align-self: center">＋</span
+            ><i class="ch girl flipx"></i>
+          </div>
+          <div class="tip">
+            <i class="ch kid"></i>
+            <div class="bubble">Factory = pekerja super cepat. Artisan = asisten bagi ahlinya. Dua-duanya berguna!</div>
+          </div>
+        </section>
+
+        <!-- 16. KUADRAN -->
+        <section class="slide" data-title="Kuadran Kai-Fu Lee">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>Kuadran <span class="grad">Kai-Fu Lee</span></h2>
+          <p class="lead">
+            Dr. Kai-Fu Lee (2018) memetakan empat cara manusia bekerja dengan KA berdasarkan dua hal: apakah dibutuhkan
+            empati/kompasi, dan apakah tugasnya ke arah optimasi atau kreativitas/strategi.
+          </p>
+          <div class="split">
+            <div class="list">
+              <div
+                class="clickable card"
+                data-label="Model Factory"
+                data-info="Tugas berulang dan massal: mengisi data otomatis, memantau sistem, memberi rekomendasi cepat."
+              >
+                <h3>🏭 Model Factory</h3>
+                <p>tugas berulang &amp; massal · otomatisasi · rekomendasi cepat</p>
+              </div>
+              <div
+                class="clickable card alt"
+                data-label="Model Artisan"
+                data-info="KA menjadi asisten profesional; keahlian dan intuisi manusia tetap utama, keputusan akhir ada pada manusia."
+              >
+                <h3>🎨 Model Artisan</h3>
+                <p>dukung profesional · keahlian dan intuisi manusia · keputusan akhir manusia</p>
+              </div>
+            </div>
+            <div class="quad-wrap">
+              <div class="axis-y"><span>Perlu</span><b>EMPATI</b><span>Tidak</span></div>
+              <div style="flex: 1">
+                <div class="quad">
+                  <div
+                    class="clickable q"
+                    data-label="Kuadran 1 · HUMAN + AI (Empati + Optimasi)"
+                    data-info="Contoh: guru, perawat, konselor, desainer konten pribadi. Butuh ide dan perasaan. KA membantu mencari materi atau membuat soal otomatis; guru tetap memberi semangat dan memahami kondisi peserta didik."
+                  >
+                    <b>1</b><small>HUMAN + AI</small><span>Empati + Optimasi</span>
+                  </div>
+                  <div
+                    class="clickable q"
+                    data-label="Kuadran 2 · HUMAN + AI (Empati + Kreativitas)"
+                    data-info="Contoh: customer service, petugas kesehatan dasar, human resource. KA membantu di awal proses (chat otomatis); masalah rumit diambil alih manusia."
+                  >
+                    <b>2</b><small>HUMAN + AI</small><span>Empati + Kreativitas</span>
+                  </div>
+                  <div
+                    class="clickable q"
+                    data-label="Kuadran 4 · AI (Tanpa Empati + Optimasi)"
+                    data-info="Contoh: analisis data besar, sistem rekomendasi, logistik otomatis. KA bisa bekerja sendiri sangat efisien, misalnya mengatur rute pengiriman agar hemat bahan bakar dan waktu."
+                  >
+                    <b>4</b><small>AI</small><span>Tanpa empati + Optimasi</span>
+                  </div>
+                  <div
+                    class="clickable q"
+                    data-label="Kuadran 3 · AI + HUMAN (Tanpa Empati + Kreativitas)"
+                    data-info="Contoh: digital marketing, desain produk, UI/UX. KA membantu tren warna, sketsa awal, dan rekomendasi desain; manusia mengambil keputusan dan membuatnya ‘memiliki rasa’."
+                  >
+                    <b>3</b><small>AI + HUMAN</small><span>Tanpa empati + Kreativitas</span>
+                  </div>
+                </div>
+                <div class="axis-x"><b>◀ OPTIMASI</b><b>KREATIVITAS / STRATEGI ▶</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik model atau kuadran</h4>
+            <p class="info-text">Penjelasan dan contoh pekerjaan akan muncul di sini.</p>
+          </div>
+        </section>
+
+        <!-- 17. DETAIL KUADRAN -->
+        <section class="slide" data-title="Contoh Tiap Kuadran">
+          <span class="sec">A · Kerja Kolaboratif Manusia dan KA</span>
+          <h2>Mengenal <span class="grad">Empat Kuadran</span> Lebih Dekat</h2>
+          <div class="tabs">
+            <button class="tab active" data-tab="kd1">1 · Empati + Optimasi</button>
+            <button class="tab" data-tab="kd2">2 · Empati + Kreativitas</button>
+            <button class="tab" data-tab="kd3">3 · Kreativitas tanpa empati</button>
+            <button class="tab" data-tab="kd4">4 · Optimasi tanpa empati</button>
+          </div>
+          <div class="tab-panel card active" id="kd1">
+            <h3>👩‍🏫 Kuadran 1: HUMAN + AI</h3>
+            <p><b>Contoh:</b> guru, perawat, konselor, desainer konten pribadi.</p>
+            <p>
+              Guru tidak dapat digantikan KA karena guru bukan hanya menyampaikan materi, tetapi juga memberi semangat,
+              memahami kondisi peserta didik, dan tahu kapan mereka perlu dibantu. KA membantu guru mencari materi atau
+              membuat soal otomatis.
+            </p>
+          </div>
+          <div class="tab-panel card alt" id="kd2">
+            <h3>🎧 Kuadran 2: HUMAN + AI</h3>
+            <p><b>Contoh:</b> customer service, petugas kesehatan dasar, human resource.</p>
+            <p>
+              Saat kamu chatting dengan customer service dan dijawab otomatis, itu adalah KA. Jika masalah lebih rumit
+              dan butuh pengertian, manusia mengambil alih. KA membantu di awal proses, manusia menyelesaikannya.
+            </p>
+          </div>
+          <div class="tab-panel card warm" id="kd3">
+            <h3>🎨 Kuadran 3: AI + HUMAN</h3>
+            <p><b>Contoh:</b> digital marketing, desain produk, UI/UX.</p>
+            <p>
+              Pekerjaan ini butuh ide, tetapi tidak terlalu memerlukan perasaan. KA membantu menemukan tren warna,
+              membuat sketsa awal, atau memberi rekomendasi desain. Kamu tetap yang mengambil keputusan dan membuat
+              desain menjadi ‘memiliki rasa’.
+            </p>
+          </div>
+          <div class="tab-panel card" id="kd4">
+            <h3>🚚 Kuadran 4: AI</h3>
+            <p><b>Contoh:</b> analisis data besar, sistem rekomendasi, logistik otomatis.</p>
+            <p>
+              KA dapat bekerja sendiri dengan sangat efisien, lebih cepat, akurat, dan tanpa lelah. Misalnya mengatur
+              rute pengiriman barang agar hemat bahan bakar dan waktu. Tidak butuh perasaan, yang penting efisien.
+            </p>
+          </div>
+          <div class="split">
+            <div class="callout">
+              KA bukan untuk menggantikan manusia, tetapi bekerja bersama manusia. KA menangani
+              <span class="grad">hitungan dan kecepatan</span>; manusia memberi
+              <span class="grad">ide, rasa, dan nilai kemanusiaan</span> (Risman, 2020).
+            </div>
+            <div class="scene" style="min-height: 170px"><i class="ch kid"></i><i class="ch robot"></i></div>
+          </div>
+          <div class="tip">
+            <i class="ch girl"></i>
+            <div class="bubble">Masa depan kolaborasi ini harus dimulai dari sekarang dan dari dirimu sendiri!</div>
+          </div>
+        </section>
+
+        <!-- 18. PENYUNTINGAN -->
+        <section class="slide" data-title="Teknik Penyuntingan">
+          <span class="sec">B · Teknik Penyuntingan Konten Digital</span>
+          <h2>Teknik <span class="grad">Penyuntingan Konten Digital</span></h2>
+          <div class="callout">Manusia meninjau dan <span class="grad">menyempurnakan hasil akhir</span></div>
+          <div class="tabs">
+            <button class="tab active" data-tab="ed-teks">📝 Teks</button>
+            <button class="tab" data-tab="ed-vis">🎬 Gambar/Video</button>
+            <button class="tab" data-tab="ed-aud">🎧 Audio</button>
+          </div>
+          <div class="tab-panel card active" id="ed-teks">
+            <h3>Penyuntingan Teks</h3>
+            <p>Perbaiki ejaan, tanda baca, struktur, dan gaya bahasa agar jelas dan efektif.</p>
+            <div class="chips">
+              <span class="chip">Grammarly / QuillBot</span><span class="chip">ChatGPT</span
+              ><span class="chip">Google Docs / Word</span><span class="chip">Chat.Qwen.ai</span
+              ><span class="chip">DeepSeek</span><span class="chip">Kimi</span>
+            </div>
+          </div>
+          <div class="tab-panel card" id="ed-vis">
+            <h3>Penyuntingan Gambar/Video</h3>
+            <p>Atur warna, potong, efek, transisi, dan musik untuk hasil yang menarik.</p>
+            <div class="chips">
+              <span class="chip">Canva Magic Edit</span><span class="chip">Adobe Firefly</span
+              ><span class="chip">Kapwing</span><span class="chip">Runway</span><span class="chip">Magisto</span>
+            </div>
+          </div>
+          <div class="tab-panel card" id="ed-aud">
+            <h3>Penyuntingan Audio</h3>
+            <p>Hilangkan noise, atur volume, dan tambahkan efek suara.</p>
+            <div class="chips">
+              <span class="chip">Adobe Podcast</span><span class="chip">Auphonic</span
+              ><span class="chip">Descript</span>
+            </div>
+          </div>
+          <div class="scene" style="min-height: 180px">
+            <i class="ch girl"></i><i class="ch robot"></i>
+            <div class="props">
+              <span style="left: 22%; top: 0">✂️</span
+              ><span style="right: 22%; top: 4%; animation-delay: 0.7s">🎨</span>
+            </div>
+          </div>
+          <div class="tip">
+            <i class="ch robot"></i>
+            <div class="bubble">
+              Kabar baiknya: kamu tidak perlu menyunting sendirian lagi. Tapi sentuhan akhir tetap di tanganmu!
+            </div>
+          </div>
+        </section>
+
+        <!-- 19. TEKS -->
+        <section class="slide" data-title="Menyunting Teks">
+          <span class="sec">B · Teknik Penyuntingan · Teks</span>
+          <h2>Penyuntingan <span class="grad">Teks</span></h2>
+          <p class="lead">
+            Penyuntingan (editing) adalah proses memperbaiki tulisan agar lebih jelas, rapi, dan mudah dibaca: memeriksa
+            ejaan, tanda baca, struktur kalimat, hingga gaya bahasa.
+          </p>
+          <div class="split">
+            <div class="list">
+              <p class="label">Alat bantu KA (klik)</p>
+              <div
+                class="clickable row"
+                data-label="Grammarly atau QuillBot"
+                data-info="Memperbaiki tata bahasa dan menyarankan kata yang lebih tepat."
+              >
+                <span class="ico">✅</span>Grammarly / QuillBot
+              </div>
+              <div
+                class="clickable row"
+                data-label="ChatGPT"
+                data-info="Membantu membuat ringkasan, menulis ulang kalimat, atau menyusun paragraf awal."
+              >
+                <span class="ico">💬</span>ChatGPT
+              </div>
+              <div
+                class="clickable row"
+                data-label="Google Docs atau Microsoft Word"
+                data-info="Fitur editor otomatis yang langsung mendeteksi kesalahan."
+              >
+                <span class="ico">📄</span>Google Docs / Microsoft Word
+              </div>
+              <div
+                class="clickable row"
+                data-label="Chat.Qwen.ai"
+                data-info="Asisten penulisan dan media: menghasilkan teks, merangkum, menulis ulang, bahkan membantu ide visual."
+              >
+                <span class="ico">🧠</span>Chat.Qwen.ai
+              </div>
+              <div
+                class="clickable row"
+                data-label="DeepSeek.com dan Kimi.com"
+                data-info="Ringkasan, penulisan ulang teks panjang, interpretasi konten, dan brainstorming berbasis konteks dan penalaran teks."
+              >
+                <span class="ico">🔎</span>DeepSeek.com &amp; Kimi.com
+              </div>
+            </div>
+            <div>
+              <div class="info-box">
+                <h4 class="info-title">Klik salah satu alat</h4>
+                <p class="info-text">Fungsinya akan muncul di sini.</p>
+              </div>
+              <div class="scene" style="min-height: 170px">
+                <i class="ch kid"></i>
+                <div class="props"><span style="right: 6%; top: 4%">✍️</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            Hanya kamu yang benar-benar tahu <span class="grad">maksud dan gaya tulisanmu</span>. Tetaplah libatkan
+            peran manusia!
+          </div>
+          <p class="label">Aktivitas 1.2 · Menyunting teks dengan bantuan KA · <span class="doneCount">0</span>/4</p>
+          <div class="list">
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Pilih satu paragraf dari tugas menulismu sebelumnya (artikel, narasi, atau deskripsi).</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Sunting dengan alat KA (Grammarly, ChatGPT, atau fitur edit di Google Docs).</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span><span>Bandingkan versi asli dan versi hasil suntingan. Apa bedanya?</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span
+                >Diskusikan bersama kelompok: apakah tulisan jadi lebih baik atau justru kehilangan gaya pribadi?</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- 20. GAMBAR VIDEO -->
+        <section class="slide" data-title="Menyunting Gambar & Video">
+          <span class="sec">B · Teknik Penyuntingan · Gambar dan Video</span>
+          <h2>Penyuntingan <span class="grad">Gambar dan Video</span></h2>
+          <p class="lead">
+            Mengatur warna, memotong adegan, memberi efek, hingga menambahkan musik atau teks kini bisa dilakukan lebih
+            cepat dan mudah dengan bantuan KA.
+          </p>
+          <div class="three">
+            <div
+              class="clickable card"
+              data-label="Canva · Magic Edit"
+              data-info="Fitur ‘Magic Edit’ dapat menghapus atau menambahkan objek secara otomatis."
+            >
+              <h3>🎨 Canva</h3>
+              <p>Fitur Magic Edit</p>
+            </div>
+            <div
+              class="clickable card alt"
+              data-label="Adobe Firefly"
+              data-info="Menghasilkan gambar dari perintah teks (text-to-image)."
+            >
+              <h3>🔥 Adobe Firefly</h3>
+              <p>Text-to-image</p>
+            </div>
+            <div
+              class="clickable card"
+              data-label="Kapwing, Runway, atau Magisto"
+              data-info="Membantu mengedit video otomatis, memilih transisi, bahkan menyinkronkan suara dan gambar."
+            >
+              <h3>🎬 Kapwing · Runway · Magisto</h3>
+              <p>Edit video otomatis</p>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu alat</h4>
+            <p class="info-text">Kemampuannya akan muncul di sini.</p>
+          </div>
+          <div class="callout">
+            KA juga bisa mengubah gaya visual (lebih dramatis) atau menyesuaikan tone video dengan mood.
+            <span class="grad">Sentuhan terakhir tetap di tanganmu.</span>
+          </div>
+          <p class="label">Aktivitas 1.3 · Individu · <span class="doneCount">0</span>/4</p>
+          <div class="list">
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Ambil satu foto atau video pendek (maksimal 1 menit) dari dokumentasi kegiatan sekolahmu.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Sunting dengan Canva atau Kapwing: tambah teks, efek visual, atau hapus objek.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span><span>Unggah hasil kerjamu ke platform yang disepakati bersama gurumu.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span
+                >Presentasikan bagaimana KA membantu. Bagian mana yang masih perlu disempurnakan secara manual?</span
+              >
+            </div>
+          </div>
+          <div class="tip r">
+            <i class="ch kid flipx"></i>
+            <div class="bubble">Satu klik Magic Edit bisa menghapus objek pengganggu di fotomu. Keren, kan?</div>
+          </div>
+        </section>
+
+        <!-- 21. AUDIO -->
+        <section class="slide" data-title="Menyunting Audio">
+          <span class="sec">B · Teknik Penyuntingan · Audio</span>
+          <h2>Penyuntingan <span class="grad">Audio</span></h2>
+          <p class="lead">
+            Podcast, voice over, dan narasi video butuh suara yang jernih. Penyuntingan audio meliputi penghapusan
+            noise, penyesuaian volume, efek suara, hingga pemotongan bagian yang tidak perlu.
+          </p>
+          <div class="three">
+            <div
+              class="clickable card"
+              data-label="Adobe Podcast (Project Shasta)"
+              data-info="Membuat suara terdengar seperti direkam di studio meskipun hanya memakai mikrofon biasa."
+            >
+              <h3>🎙️ Adobe Podcast</h3>
+              <p>Suara ala studio</p>
+            </div>
+            <div class="clickable card alt" data-label="Auphonic" data-info="Menyesuaikan level suara secara otomatis.">
+              <h3>🎚️ Auphonic</h3>
+              <p>Level suara otomatis</p>
+            </div>
+            <div
+              class="clickable card"
+              data-label="Descript"
+              data-info="Memungkinkan kamu mengedit audio seperti mengedit teks."
+            >
+              <h3>📝 Descript</h3>
+              <p>Edit audio seperti teks</p>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu alat</h4>
+            <p class="info-text">Kemampuannya akan muncul di sini.</p>
+          </div>
+          <div class="callout">
+            Ada juga alat yang menghilangkan suara latar, memperbaiki intonasi, bahkan menyintesis suara baru.
+            <span class="grad">Pastikan hasil akhirnya nyaman didengar dan sesuai konteks.</span>
+          </div>
+          <p class="label">Aktivitas 1.4 · Individu · <span class="doneCount">0</span>/4</p>
+          <div class="list">
+            <div class="check-step row">
+              <span class="box"></span
+              ><span
+                >Rekam suaramu membacakan paragraf pendek (puisi, narasi, atau deskripsi produk) sekitar 30–60
+                detik.</span
+              >
+            </div>
+            <div class="check-step row">
+              <span class="box"></span><span>Sunting dengan aplikasi KA (Adobe Podcast, Descript, atau Auphonic).</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span><span>Bandingkan audio asli dengan hasil suntingan.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span><span>Refleksi: apakah kualitas suara meningkat? Apakah prosesnya mudah?</span>
+            </div>
+          </div>
+          <div class="tip">
+            <i class="ch girl"></i>
+            <div class="bubble">Rekam di ruangan sepi dulu, lalu biarkan KA yang merapikan sisanya!</div>
+          </div>
+        </section>
+
+        <!-- 22. ETIKA -->
+        <section class="slide" data-title="Etika & Hak Cipta">
+          <span class="sec">C · Etika dan Hak Cipta</span>
+          <h2>Etika dan Hak Cipta dalam <span class="grad">Produksi Konten Digital</span></h2>
+          <p class="lead">
+            Pemahaman etika dan hak cipta penting agar kamu sadar batasan hukum dan moral dalam membuat serta
+            menyebarkan konten digital. Klik kartu untuk membaliknya.
+          </p>
+          <div class="flip-grid">
+            <div class="flip">
+              <div class="flip-in">
+                <div class="face front">
+                  <span class="ico">🙏</span>
+                  <h3>Sebutkan Sumber</h3>
+                </div>
+                <div class="face back">
+                  <p>Selalu beri kredit yang tepat pada karya yang digunakan: teks, gambar, video, atau musik.</p>
+                </div>
+              </div>
+            </div>
+            <div class="flip">
+              <div class="flip-in">
+                <div class="face front">
+                  <span class="ico">🚫</span>
+                  <h3>Jauhi Plagiarisme</h3>
+                </div>
+                <div class="face back">
+                  <p>
+                    Memakai musik, video, atau gambar tanpa izin yang sah dari pemilik hak cipta adalah pelanggaran.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="flip">
+              <div class="flip-in">
+                <div class="face front">
+                  <span class="ico">📜</span>
+                  <h3>Pahami Lisensi</h3>
+                </div>
+                <div class="face back">
+                  <p>
+                    Creative Commons dan lisensi terbuka membolehkan penggunaan karya dengan hak tertentu selama
+                    mengikuti ketentuannya.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="flip">
+              <div class="flip-in">
+                <div class="face front">
+                  <span class="ico">🛡️</span>
+                  <h3>Etika Representasi</h3>
+                </div>
+                <div class="face back">
+                  <p>Jangan menyebarkan hoaks, konten diskriminatif, atau yang melanggar privasi individu.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            Patuhi keempat hal ini agar kontenmu <span class="grad">tidak bermasalah di kemudian hari.</span>
+          </div>
+          <div class="tip">
+            <i class="ch robot"></i>
+            <div class="bubble">Yuk uji pemahamanmu di game “Boleh atau Tidak?” pada slide berikutnya!</div>
+          </div>
+        </section>
+
+        <!-- 23. GAME -->
+        <section class="slide" data-title="Game: Boleh atau Tidak?">
+          <span class="sec">C · Etika dan Hak Cipta · Game</span>
+          <div id="game"></div>
+        </section>
+
+        <!-- 24. PROYEK -->
+        <section class="slide" data-title="Proyek Kolaborasi">
+          <span class="sec">D · Proyek Kolaborasi</span>
+          <h2>Proyek Kolaborasi: <span class="grad">Membuat Kampanye Digital</span></h2>
+          <p class="lead">
+            Kamu akan bekerja dalam kelompok kecil (3–5 orang) membuat konten kampanye digital tentang isu yang dekat
+            dengan kehidupan remaja, memakai KA sebagai rekan kerja digital melalui teknik rekayasa prompt.
+          </p>
+          <div class="two">
+            <div class="card">
+              <h3>Tema Pilihan</h3>
+              <div class="chips">
+                <span class="chip">1. etika digital</span><span class="chip">2. perundungan siber</span
+                ><span class="chip">3. literasi informasi dan hoaks</span
+                ><span class="chip">4. kesehatan mental di era media sosial</span
+                ><span class="chip">5. jejak digital dan privasi</span>
+              </div>
+            </div>
+            <div class="card alt">
+              <h3>Format Karya</h3>
+              <div class="chips">
+                <span class="chip">video pendek (±1–2 menit)</span
+                ><span class="chip">infografik / poster digital interaktif</span
+                ><span class="chip">audio / podcast singkat</span><span class="chip">kombinasi dua format</span>
+              </div>
+            </div>
+          </div>
+          <p class="label">Tahapan proyek (klik)</p>
+          <div class="steps five">
+            <div
+              class="clickable step"
+              data-label="01 · Observasi &amp; ideasi"
+              data-info="Lihat dan catat: survei atau observasi di sekolah/lingkungan, identifikasi isu yang layak diangkat."
+            >
+              <b>01</b>
+              <p>observasi &amp; ideasi</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="02 · Diskusi &amp; perencanaan"
+              data-info="Diskusikan temuan, tentukan tema dan jenis konten, pakai thinking routine See–Think–Wonder."
+            >
+              <b>02</b>
+              <p>diskusi &amp; perencanaan</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="03 · Pembagian peran &amp; prompt"
+              data-info="Tentukan peran tiap anggota dan rancang prompt untuk KA sesuai kebutuhan."
+            >
+              <b>03</b>
+              <p>pembagian peran &amp; prompt</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="04 · Produksi &amp; iterasi"
+              data-info="Buat konten bersama dengan membagi peran manusia dan KA, lalu sempurnakan berdasarkan masukan."
+            >
+              <b>04</b>
+              <p>produksi &amp; iterasi</p>
+            </div>
+            <div
+              class="clickable step"
+              data-label="05 · Publikasi &amp; presentasi"
+              data-info="Presentasikan hasil: ceritakan proses, pembagian kerja, tantangan, dan refleksi kolaborasi."
+            >
+              <b>05</b>
+              <p>publikasi &amp; presentasi</p>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu tahap</h4>
+            <p class="info-text">Detail tahapan akan muncul di sini.</p>
+          </div>
+          <div class="callout">
+            Konten harus diproduksi secara kolaboratif, memanfaatkan peran manusia dan KA, serta
+            <span class="grad">mencerminkan etika dan nilai kemanusiaan.</span>
+          </div>
+        </section>
+
+        <!-- 25. LANGKAH 1-2 -->
+        <section class="slide" data-title="Langkah 1–2">
+          <span class="sec">D · Proyek Kolaborasi · Langkah 1–2</span>
+          <h2>Langkah 1–2: <span class="grad">Observasi, Ideasi, Diskusi</span></h2>
+          <div class="two">
+            <div class="card">
+              <h3>👀 1 · Observasi dan Ideasi (Lihat dan Catat)</h3>
+              <ul>
+                <li>Lakukan survei atau observasi di sekolah/lingkungan sekitar.</li>
+                <li>Identifikasi isu sosial atau digital yang layak diangkat.</li>
+                <li>Gunakan alat seperti Google Form atau wawancara teman.</li>
+              </ul>
+            </div>
+            <div class="card alt">
+              <h3>💬 2 · Diskusi dan Perencanaan</h3>
+              <ul>
+                <li>Diskusikan temuan bersama kelompok.</li>
+                <li>Tentukan tema kampanye dan jenis konten yang akan dibuat.</li>
+                <li>Gunakan thinking routine “See–Think–Wonder” untuk menggali ide.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="label">Thinking routine: See–Think–Wonder (klik)</p>
+          <div class="three">
+            <div
+              class="clickable card"
+              data-label="See · Apa yang kamu lihat?"
+              data-info="Tuliskan hal-hal yang kamu amati secara apa adanya, tanpa menafsirkan dulu."
+            >
+              <h3>👁️ See</h3>
+              <p>Apa yang kulihat?</p>
+            </div>
+            <div
+              class="clickable card alt"
+              data-label="Think · Apa yang kamu pikirkan?"
+              data-info="Hubungkan pengamatanmu dengan pengalaman dan pengetahuan. Apa yang menurutmu sedang terjadi?"
+            >
+              <h3>🧠 Think</h3>
+              <p>Apa yang kupikirkan?</p>
+            </div>
+            <div
+              class="clickable card"
+              data-label="Wonder · Apa yang kamu pertanyakan?"
+              data-info="Munculkan pertanyaan dan rasa ingin tahu. Dari sinilah ide kampanye bisa lahir."
+            >
+              <h3>❓ Wonder</h3>
+              <p>Apa yang kupertanyakan?</p>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu langkah</h4>
+            <p class="info-text">Penjelasan akan muncul di sini.</p>
+          </div>
+          <div class="scene" style="min-height: 170px">
+            <i class="ch girl"></i><i class="ch kid"></i>
+            <div class="props">
+              <span style="left: 34%; top: 0">🔍</span
+              ><span style="right: 30%; top: 2%; animation-delay: 0.8s">📋</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 26. LANGKAH 3 -->
+        <section class="slide" data-title="Langkah 3: Peran & Prompt">
+          <span class="sec">D · Proyek Kolaborasi · Langkah 3</span>
+          <h2>Langkah 3: <span class="grad">Pembagian Peran dan Prompt</span></h2>
+          <p class="lead">
+            Tentukan peran tiap anggota dan rancang prompt untuk KA sesuai kebutuhan. Klik peran untuk detail.
+          </p>
+          <div class="steps four">
+            <div
+              class="clickable step"
+              data-label="Penulis naskah"
+              data-info="Menyusun naskah dan pesan utama kampanye, dibantu KA teks seperti ChatGPT, Chat.Qwen.ai, DeepSeek, atau Kimi."
+            >
+              <span class="ico">✍️</span>
+              <h3>Penulis naskah</h3>
+            </div>
+            <div
+              class="clickable step"
+              data-label="Penyunting visual/audio"
+              data-info="Merapikan gambar, video, dan audio, misalnya dengan Kapwing, Canva, Descript, atau Adobe Podcast."
+            >
+              <span class="ico">🎞️</span>
+              <h3>Penyunting visual/audio</h3>
+            </div>
+            <div
+              class="clickable step"
+              data-label="Operator KA"
+              data-info="Mengetik prompt ke KA, mencoba variasi prompt, dan memilih hasil yang paling sesuai."
+            >
+              <span class="ico">🤖</span>
+              <h3>Operator KA</h3>
+            </div>
+            <div
+              class="clickable step"
+              data-label="Evaluator"
+              data-info="Memeriksa kebenaran, etika, hak cipta, dan kesesuaian pesan sebelum konten dipublikasikan."
+            >
+              <span class="ico">🔍</span>
+              <h3>Evaluator</h3>
+            </div>
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu peran</h4>
+            <p class="info-text">Tugasnya akan muncul di sini.</p>
+          </div>
+          <p class="label">Contoh alur alat bantu</p>
+          <div class="flow">
+            <span class="chip">📝 Naskah: ChatGPT · Chat.Qwen.ai · DeepSeek.com · Kimi.com</span
+            ><span class="arrow">→</span> <span class="chip">🖼️ Visual: DALL·E · Adobe Firefly</span
+            ><span class="arrow">→</span> <span class="chip">🎧 Audio: Descript · Adobe Podcast</span
+            ><span class="arrow">→</span>
+            <span class="chip">✂️ Editing: Kapwing · Canva</span>
+          </div>
+          <div class="tip">
+            <i class="ch robot"></i>
+            <div class="bubble">Prompt yang jelas dan spesifik = hasil KA yang jauh lebih tepat!</div>
+          </div>
+        </section>
+
+        <!-- 27. LANGKAH 4-5 -->
+        <section class="slide" data-title="Langkah 4–5">
+          <span class="sec">D · Proyek Kolaborasi · Langkah 4–5</span>
+          <h2>Langkah 4–5: <span class="grad">Produksi, Publikasi, Presentasi</span></h2>
+          <div class="two">
+            <div class="card">
+              <h3>🛠️ 4 · Produksi Konten (Mengerjakan Bersama)</h3>
+              <ul>
+                <li>Buat konten dengan membagi peran antara manusia dan KA.</li>
+                <li>Lakukan iterasi: penyempurnaan berdasarkan masukan.</li>
+                <li>Evaluasi: bagian mana yang memerlukan intervensi manusia? Apa yang dapat diserahkan kepada KA?</li>
+              </ul>
+            </div>
+            <div class="card alt">
+              <h3>🎤 5 · Publikasi dan Presentasi (Menunjukkan Karya)</h3>
+              <ul>
+                <li>Presentasikan hasil proyek kepada teman sekelas.</li>
+                <li>Ceritakan proses, pembagian kerja, tantangan, dan refleksi atas kolaborasi manusia dan KA.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="label">Putaran iterasi (klik untuk melihat maknanya)</p>
+          <div class="flow">
+            <span
+              class="clickable chip"
+              data-label="Buat draf"
+              data-info="KA membantu menghasilkan draf awal dengan cepat."
+              >1 · buat draf</span
+            ><span class="arrow">→</span>
+            <span
+              class="clickable chip"
+              data-label="Periksa"
+              data-info="Manusia memeriksa kebenaran, gaya bahasa, dan nilai."
+              >2 · periksa</span
+            ><span class="arrow">→</span>
+            <span
+              class="clickable chip"
+              data-label="Perbaiki"
+              data-info="Perbaiki berdasarkan masukan, ubah prompt bila perlu."
+              >3 · perbaiki</span
+            ><span class="arrow">→</span>
+            <span
+              class="clickable chip"
+              data-label="Ulangi sampai pas"
+              data-info="Ulangi putaran sampai hasilnya sesuai tujuan kampanye."
+              >4 · ulangi</span
+            >
+          </div>
+          <div class="info-box">
+            <h4 class="info-title">Klik salah satu tahap iterasi</h4>
+            <p class="info-text">Penjelasan akan muncul di sini.</p>
+          </div>
+          <div class="scene" style="min-height: 170px">
+            <i class="ch kid"></i><i class="ch robot"></i><i class="ch girl"></i>
+            <div class="props">
+              <span style="left: 6%; top: 0">🏆</span><span style="right: 6%; top: 2%; animation-delay: 0.8s">📣</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 28. AKTIVITAS 1.5 -->
+        <section class="slide" data-title="Aktivitas 1.5">
+          <span class="sec">Aktivitas 1.5 · Individu</span>
+          <h2>Proyek Kolaborasi Konten <span class="grad">Kampanye Digital dengan KA</span></h2>
+          <p class="label">Klik untuk menandai selesai · <span class="doneCount">0</span>/6</p>
+          <div class="list">
+            <div class="check-step row">
+              <span class="box"></span><span>Pilih salah satu isu yang akan dibuat kampanye.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Buat prompt untuk menghasilkan poster bertema sesuai isu yang dipilih.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span
+                >Gunakan aplikasi seperti DALL·E atau Firefly. Coba beberapa variasi prompt, lalu evaluasi
+                hasilnya.</span
+              >
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span
+                >Ambil skrip/naskah atau gambar/video mentah (belum disunting), lalu minta bantuan KA untuk
+                menyuntingnya.</span
+              >
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Bandingkan hasilnya, lalu kemukakan bagaimana peran manusia dalam menyempurnakan hasil KA.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Presentasikan hasil kolaborasimu dan uraikan pembagian peran antara kamu dan KA.</span>
+            </div>
+          </div>
+          <div class="tip r">
+            <i class="ch girl flipx"></i>
+            <div class="bubble">Coba tiga versi prompt. Biasanya yang paling jelas dan detail menang!</div>
+          </div>
+        </section>
+
+        <!-- 29. DISEMINASI -->
+        <section class="slide" data-title="Diseminasi">
+          <span class="sec">E · Diseminasi Konten</span>
+          <h2>Diseminasi <span class="grad">Konten Digital</span></h2>
+          <p class="lead">
+            Diseminasi adalah proses menyebarkan konten ke audiens melalui berbagai platform digital. Konten baru
+            bermanfaat jika menjangkau banyak orang. Klik kartu untuk membuka.
+          </p>
+          <div class="three">
+            <div class="expand card">
+              <h3>🤖 KA membantu</h3>
+              <ul class="detail">
+                <li>rekomendasi waktu unggah</li>
+                <li>draf caption otomatis</li>
+                <li>menghitung penonton, like, share, dan komentar</li>
+              </ul>
+            </div>
+            <div class="expand card alt">
+              <h3>👤 Manusia menentukan</h3>
+              <ul class="detail">
+                <li>platform yang paling tepat</li>
+                <li>menyesuaikan bahasa dengan audiens</li>
+                <li>mengevaluasi dampak edukatif</li>
+              </ul>
+            </div>
+            <div class="expand card">
+              <h3>🎯 Hasil yang diinginkan</h3>
+              <ul class="detail">
+                <li>konten tepat sasaran</li>
+                <li>audiens terlibat</li>
+                <li>dampak edukatif nyata</li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout">
+            Diseminasi harus <span class="grad">cerdas, strategis, dan bertanggung jawab</span> agar berdampak nyata.
+          </div>
+          <div class="scene" style="min-height: 170px">
+            <i class="ch girl"></i><i class="ch robot"></i>
+            <div class="props">
+              <span style="left: 30%; top: 0">📱</span
+              ><span style="right: 28%; top: 4%; animation-delay: 0.8s">❤️</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 30. CONTOH DISEMINASI -->
+        <section class="slide" data-title="Contoh Diseminasi">
+          <span class="sec">E · Diseminasi Konten · Contoh</span>
+          <h2>Contoh: Poster Hemat Energi &amp; <span class="grad">Video Anti-Bullying</span></h2>
+          <p class="lead">
+            Posternya sudah keren: ilustrasi lampu hemat listrik buatan KA, pesan “Matikan listrik, jika tidak
+            digunakan!”, serta data penghematan listrik. Videonya mengajak saling menghargai: “Stop bullying, mulai dari
+            kita!”. Lalu bagaimana menyebarkannya?
+          </p>
+          <div class="tabs">
+            <button class="tab active" data-tab="dis-ka">🤖 Peran KA</button>
+            <button class="tab" data-tab="dis-m">👤 Peran Manusia</button>
+          </div>
+          <div class="tab-panel card active" id="dis-ka">
+            <ul>
+              <li>Menyarankan waktu terbaik mengunggah, misalnya sore hari ketika banyak orang daring.</li>
+              <li>Membuat caption singkat otomatis:</li>
+            </ul>
+            <div class="chips">
+              <span class="chip">⚡ “Ayo hemat energi, mulai dari rumah kita sendiri!”</span
+              ><span class="chip">🛑 “Stop bullying, mulai dari kita!”</span>
+            </div>
+            <ul style="margin-top: 8px">
+              <li>
+                Setelah dipublikasikan, menghitung berapa banyak orang yang melihat, menyukai, membagikan, atau
+                berkomentar.
+              </li>
+            </ul>
+          </div>
+          <div class="tab-panel card alt" id="dis-m">
+            <ul>
+              <li>Memutuskan platform: Instagram sekolah, website OSIS, atau grup komunitas.</li>
+              <li>Menyunting caption agar sesuai gaya bahasa audiens:</li>
+            </ul>
+            <div class="chips">
+              <span class="chip">🌱 “Yuk, kita jadi generasi peduli lingkungan!”</span
+              ><span class="chip">💙 “Kita semua berhak merasa aman di sekolah. Jangan ada bullying lagi!”</span>
+            </div>
+            <ul style="margin-top: 8px">
+              <li>Mengevaluasi: apakah pesannya benar-benar mendidik? Adakah risiko menyinggung pihak tertentu?</li>
+            </ul>
+          </div>
+          <div class="callout">
+            Poster bukan sekadar gambar, video bukan sekadar hiburan. Keduanya bisa menjadi
+            <span class="grad">media edukasi yang menginspirasi.</span> Diseminasi adalah bagian dari literasi digital
+            tingkat lanjut.
+          </div>
+          <div class="tip">
+            <i class="ch kid"></i>
+            <div class="bubble">
+              Karya yang hanya disimpan di laptop tidak akan mengubah apa-apa. Yuk sebarkan dengan bijak!
+            </div>
+          </div>
+        </section>
+
+        <!-- 31. AKTIVITAS 1.6 -->
+        <section class="slide" data-title="Aktivitas 1.6">
+          <span class="sec">Aktivitas 1.6 · Individu</span>
+          <h2>Penyebarluasan <span class="grad">Konten</span></h2>
+          <p class="lead">
+            Setelah menghasilkan konten kampanye bersama KA pada Aktivitas 1.5, sebarkan agar pesanmu menjangkau audiens
+            lebih luas. <b class="doneCount">0</b>/7 selesai.
+          </p>
+          <div class="list">
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Tentukan platform penyebaran (Instagram, blog sekolah, YouTube, atau grup WhatsApp kelas).</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span><span>Gunakan KA untuk membuat caption singkat atau deskripsi yang sesuai.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Coba beberapa variasi caption dari KA, lalu pilih dan edit sesuai gaya bahasa dan pesanmu.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span><span>Minta rekomendasi KA tentang waktu terbaik mengunggah.</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Simulasikan proses unggahan (cukup tampilkan di kelas atau forum belajar).</span>
+            </div>
+            <div class="check-step row">
+              <span class="box"></span
+              ><span>Evaluasi hasil simulasi: bayangkan respons audiens dan jelaskan peran KA serta manusia.</span>
+            </div>
+            <div class="check-step row"><span class="box"></span><span>Jawab pertanyaan refleksi di bawah.</span></div>
+          </div>
+          <div class="expand card">
+            <h3>❓ Pertanyaan refleksi (klik)</h3>
+            <ol class="detail">
+              <li>Bagian mana dari proses diseminasi yang lebih efektif dibantu oleh KA?</li>
+              <li>Bagian mana yang tetap harus dikendalikan oleh manusia?</li>
+              <li>Bagaimana memastikan konten yang disebarkan benar-benar bermanfaat dan etis bagi audiens?</li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- 32. AKTIVITAS PEMBELAJARAN -->
+        <section class="slide" data-title="Aktivitas Pembelajaran">
+          <span class="sec">Aktivitas Kelompok</span>
+          <h2>Aktivitas Pembelajaran: <span class="grad">Tugas Kampanye Digital Kolaboratif</span></h2>
+          <p class="lead">Klik tiap langkah untuk menandainya selesai. <b class="doneCount">0</b> / 5 selesai.</p>
+          <div class="steps five">
+            <div class="check-step step">
+              <b>01</b>
+              <h3>Bentuk kelompok</h3>
+              <p>3–5 orang dalam satu tim</p>
+            </div>
+            <div class="check-step step">
+              <b>02</b>
+              <h3>Pilih isu kampanye digital</h3>
+              <p>sesuai tema dan relevan dengan audiens</p>
+            </div>
+            <div class="check-step step">
+              <b>03</b>
+              <h3>Kolaborasi manusia dan KA</h3>
+              <p>gunakan KA dan manusia sesuai peran dalam produksi konten</p>
+            </div>
+            <div class="check-step step">
+              <b>04</b>
+              <h3>Presentasikan hasil</h3>
+              <p>jelaskan pembagian peran dan kolaborasi manusia-KA</p>
+            </div>
+            <div class="check-step step">
+              <b>05</b>
+              <h3>Refleksi pembelajaran</h3>
+              <p>bahas manfaat kolaborasi dan tantangan yang dihadapi</p>
+            </div>
+          </div>
+          <div class="scene" style="min-height: 180px">
+            <i class="ch girl"></i><i class="ch kid"></i><i class="ch robot"></i>
+          </div>
+          <button class="btn" data-go="next">Lanjut ke Uji Kompetensi →</button>
+        </section>
+
+        <!-- 33. UJI KOMPETENSI -->
+        <section class="slide" data-title="Uji Kompetensi & Rubrik">
+          <span class="sec">F · Uji Kompetensi</span>
+          <h2>Uji <span class="grad">Kompetensi</span></h2>
+          <p class="lead">
+            Perhatikan ilustrasi pada setiap soal, lalu kerjakan tugasnya. Pilih soal pada tab di bawah.
+          </p>
+          <div class="tabs">
+            <button class="tab active" data-tab="uk1">Soal 1</button><button class="tab" data-tab="uk2">Soal 2</button
+            ><button class="tab" data-tab="uk3">Soal 3</button><button class="tab" data-tab="uk4">Soal 4</button
+            ><button class="tab" data-tab="uk5">Soal 5</button><button class="tab" data-tab="uk6">📋 Rubrik</button>
+          </div>
+          <div class="tab-panel card active" id="uk1">
+            <p>
+              Seorang siswa membuat video kampanye tentang kesehatan mental remaja. Ia menggunakan ChatGPT untuk
+              menyusun naskah, DALL·E untuk membuat ilustrasi, dan Kapwing untuk menyunting video. Namun, hasil akhirnya
+              dinilai kurang relevan dengan budaya lokal dan memiliki gaya bahasa yang terlalu formal.
+            </p>
+            <p><b>Tugas:</b></p>
+            <ol>
+              <li>Analisislah masalah yang muncul dari penggunaan KA dalam skenario tersebut!</li>
+              <li>Sebutkan bagian mana yang seharusnya lebih banyak melibatkan peran manusia! Jelaskan alasannya!</li>
+            </ol>
+          </div>
+          <div class="tab-panel card" id="uk2">
+            <p>
+              Kalian diminta membuat konten edukatif tentang bahaya hoaks digital. Alat KA yang tersedia: Canva,
+              Grammarly, ChatGPT, Chat.Qwen.ai, DeepSeek.com, Kimi.com, Adobe Podcast, dan Runway ML.
+            </p>
+            <p><b>Pertanyaan:</b></p>
+            <ol>
+              <li>Alat mana saja yang akan kamu pilih dan jelaskan alasannya!</li>
+              <li>Bagaimana kamu memastikan konten tersebut tetap etis dan akurat?</li>
+            </ol>
+          </div>
+          <div class="tab-panel card" id="uk3">
+            <p>
+              Rancang skema kerja kolaboratif antara manusia dan KA untuk membuat podcast bertema “Jejak Digital dan
+              Privasi Online”.
+            </p>
+            <p><b>Tugas:</b></p>
+            <ol>
+              <li>
+                Tentukan peran manusia dan peran KA pada setiap tahap produksi (pra-produksi, produksi, dan
+                pascaproduksi)!
+              </li>
+              <li>Gunakan tabel atau diagram untuk menjelaskan pembagian kerja dan alur prosesnya!</li>
+            </ol>
+          </div>
+          <div class="tab-panel card" id="uk4">
+            <p>
+              <b>Rekayasa Prompt.</b> Kamu ingin membuat poster digital bertema “Etika Bermedia Sosial” menggunakan KA
+              generatif visual, seperti DALL·E atau Firefly.
+            </p>
+            <p><b>Tugas:</b></p>
+            <ol>
+              <li>Buatlah tiga versi prompt berbeda untuk menghasilkan poster tersebut!</li>
+              <li>Bandingkan hasilnya, lalu refleksikan prompt mana yang paling efektif dan jelaskan alasannya!</li>
+            </ol>
+          </div>
+          <div class="tab-panel card" id="uk5">
+            <p>Berdasarkan pengalamanmu bekerja dengan KA dalam proyek akhir, jawablah:</p>
+            <ol>
+              <li>Apa tantangan etis yang kamu temui ketika menggunakan konten yang dihasilkan oleh KA?</li>
+              <li>Bagaimana kamu menyikapi persoalan hak cipta dan orisinalitas dalam kolaborasi dengan KA?</li>
+              <li>
+                Menurutmu, apakah kolaborasi dengan KA dapat mengembangkan kreativitas atau justru menurunkannya?
+                Jelaskan pendapatmu!
+              </li>
+            </ol>
+          </div>
+          <div class="tab-panel card alt" id="uk6">
+            <table class="tbl">
+              <tr>
+                <th>Aspek yang Dinilai</th>
+                <th>Kriteria</th>
+              </tr>
+              <tr>
+                <td>Pemahaman Konsep KA dan Kolaborasi</td>
+                <td>Mengidentifikasi dan menjelaskan konsep secara akurat dan keterhubungan antartopik.</td>
+              </tr>
+              <tr>
+                <td>Analisis Masalah</td>
+                <td>Menemukan permasalahan dan memberikan solusi yang logis dan kontekstual.</td>
+              </tr>
+              <tr>
+                <td>Kreativitas Solusi</td>
+                <td>Menyajikan solusi baru, orisinal, dan praktis.</td>
+              </tr>
+              <tr>
+                <td>Etika Digital</td>
+                <td>Menunjukkan kesadaran terhadap hak cipta, keaslian, dan tanggung jawab digital.</td>
+              </tr>
+              <tr>
+                <td>Refleksi Pribadi</td>
+                <td>Menunjukkan pemahaman diri, pembelajaran, dan sikap terhadap masa depan KA.</td>
+              </tr>
+            </table>
+          </div>
+          <div class="tip">
+            <i class="ch robot"></i>
+            <div class="bubble">Tidak ada jawaban tunggal. Nilai terbaik datang dari analisis yang logis dan etis!</div>
+          </div>
+        </section>
+
+        <!-- 34. PENGAYAAN -->
+        <section class="slide" data-title="Pengayaan">
+          <span class="sec">G · Pengayaan</span>
+          <h2><span class="grad">Pengayaan</span>: Perkaya Dirimu!</h2>
+          <p class="lead">Materi ini berkembang sangat pesat. Yuk, cari tahu lebih banyak lagi!</p>
+          <div class="tabs">
+            <button class="tab active" data-tab="pg1">1 · Pengenalan KA</button
+            ><button class="tab" data-tab="pg2">2 · Prompt</button
+            ><button class="tab" data-tab="pg3">3 · Eksperimen</button
+            ><button class="tab" data-tab="pg4">4 · Etika</button
+            ><button class="tab" data-tab="pg5">5 · Dunia Nyata</button
+            ><button class="tab" data-tab="pg6">6 · Tugas</button>
+          </div>
+          <div class="tab-panel card active" id="pg1">
+            <p><b>Tujuan:</b> memahami cara kerja KA secara umum dan aplikatif.</p>
+            <p class="label">Materi</p>
+            <a class="lnk" target="_blank" rel="noopener" href="https://experiments.withgoogle.com/"
+              >Google AI Experiments</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://asean.newsroom.ibm.com/indonesia"
+              >IBM for AI Youth</a
+            ><a
+              class="lnk"
+              target="_blank"
+              rel="noopener"
+              href="https://aihub.id/pengetahuan-dasar/ai-pengertian-contohnya"
+              >Apa Itu Artificial Intelligence?</a
+            ><a
+              class="lnk"
+              target="_blank"
+              rel="noopener"
+              href="https://www.ibm.com/id-id/think/topics/artificial-intelligence"
+              >Apa yang dimaksud dengan AI? (IBM)</a
+            >
+            <p class="label">Video</p>
+            <a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1d"
+              >Apa itu AI? BBC Ideas (4 mnt)</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1e"
+              >AI for Beginners (10 mnt)</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1f"
+              >Mengenal Kecerdasan Buatan (8 mnt)</a
+            >
+          </div>
+          <div class="tab-panel card alt" id="pg2">
+            <p><b>Tujuan:</b> berinteraksi secara efektif dengan KA.</p>
+            <p class="label">Materi</p>
+            <a
+              class="lnk"
+              target="_blank"
+              rel="noopener"
+              href="https://platform.openai.com/docs/guides/gpt-best-practices"
+              >OpenAI: Best Practices Prompt</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://learnprompting.org/">LearnPrompting.org</a>
+            <p class="label">Video</p>
+            <a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1g"
+              >Prompt Engineering for Beginners</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1h"
+              >How to Talk to AI</a
+            >
+          </div>
+          <div class="tab-panel card" id="pg3">
+            <p><b>Tujuan:</b> berlatih langsung agar lebih memahami kemampuan KA.</p>
+            <a
+              class="lnk"
+              target="_blank"
+              rel="noopener"
+              href="https://artsandculture.google.com/experiment/say-what-you-see/jwG3m7wQShZngw?hl=en"
+              >Say What You See (Google Arts &amp; Culture)</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://openai.com/dall-e">DALL·E</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://runwayml.com/">Runway ML</a>
+          </div>
+          <div class="tab-panel card warm" id="pg4">
+            <p><b>Tujuan:</b> membangun kesadaran etika digital.</p>
+            <p class="label">Bacaan</p>
+            <a class="lnk" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/"
+              >Creative Commons License</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://en.unesco.org/artificial-intelligence/ethics"
+              >UNESCO: Etika KA</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://literasidigital.id/"
+              >Kominfo RI: Literasi Digital</a
+            >
+            <p class="label">Video</p>
+            <a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1i"
+              >Ethics and Privacy</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1j"
+              >AI: Etika dalam Pendidikan</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1k"
+              >What are Creative Commons Licenses?</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1l"
+              >Seputar Copyright</a
+            >
+          </div>
+          <div class="tab-panel card" id="pg5">
+            <p><b>Tujuan:</b> mengetahui contoh penerapan nyata KA.</p>
+            <p class="label">Bacaan</p>
+            <a
+              class="lnk"
+              target="_blank"
+              rel="noopener"
+              href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai"
+              >McKinsey 2025: The State of AI</a
+            ><a
+              class="lnk"
+              target="_blank"
+              rel="noopener"
+              href="https://www.futuremindslab.com/blog/2019/6/12/how-to-be-good-at-human-things-in-a-post-ai-world"
+              >Future Minds Lab</a
+            >
+            <p class="label">Video</p>
+            <a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1m"
+              >How AI Is Changing the Workplace</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1n"
+              >GZERO World (20 mnt)</a
+            ><a class="lnk" target="_blank" rel="noopener" href="https://buku.kemdikbud.go.id/s/KKA11-Video1o"
+              >AI in Education: A tool, not a teacher (5 mnt)</a
+            >
+          </div>
+          <div class="tab-panel card alt" id="pg6">
+            <table class="tbl">
+              <tr>
+                <th>Aktivitas</th>
+                <th>Tautan</th>
+              </tr>
+              <tr>
+                <td>Buatlah gambar KA menggunakan DALL·E!</td>
+                <td><a href="https://openai.com/dall-e" target="_blank" rel="noopener">openai.com/dall-e</a></td>
+              </tr>
+              <tr>
+                <td>Buatlah konten otomatis di Canva Magic!</td>
+                <td>
+                  <a href="https://www.canva.com/id_id/ajaib/" target="_blank" rel="noopener">canva.com/id_id/ajaib</a>
+                </td>
+              </tr>
+              <tr>
+                <td>Edit video sekolah menggunakan Runway!</td>
+                <td><a href="https://runwayml.com/" target="_blank" rel="noopener">runwayml.com</a></td>
+              </tr>
+              <tr>
+                <td>Evaluasi etika dari gambar KA!</td>
+                <td>
+                  <a href="https://creativecommons.org/licenses/" target="_blank" rel="noopener"
+                    >creativecommons.org/licenses</a
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td>Cobalah tiga variasi prompt di ChatGPT!</td>
+                <td>
+                  <a href="https://platform.openai.com/docs/guides/gpt-best-practices" target="_blank" rel="noopener"
+                    >platform.openai.com/docs</a
+                  >
+                </td>
+              </tr>
+            </table>
+          </div>
+        </section>
+
+        <!-- 35. REFLEKSI -->
+        <section class="slide" data-title="Refleksi">
+          <span class="sec">H · Refleksi</span>
+          <h2><span class="grad">Refleksi</span> Pembelajaran</h2>
+          <p class="lead">
+            Isilah dengan jujur berdasarkan pengalamanmu. Tidak ada jawaban benar atau salah; yang penting adalah proses
+            berpikirmu sendiri.
+          </p>
+          <div class="list" id="reflect"></div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap">
+            <button class="btn sm" id="copyRef">📋 Salin jawabanku</button
+            ><button class="btn sm" data-go="next" style="background: linear-gradient(90deg, #f472b6, #8b5cf6)">
+              Lanjut ke Kuis →
+            </button>
+          </div>
+          <p class="hint" id="copyMsg"></p>
+          <div class="tip">
+            <i class="ch kid"></i>
+            <div class="bubble">
+              Jawabanmu hanya ada di halaman ini. Salin dulu kalau ingin disimpan atau dikumpulkan.
+            </div>
+          </div>
+        </section>
+
+        <!-- 36. KUIS -->
+        <section class="slide" data-title="Kuis">
+          <div id="quiz"></div>
+        </section>
+      </main>
+
+      <footer class="controls">
+        <button class="nav" id="prev" aria-label="Sebelumnya">←</button>
+        <select id="jump" aria-label="Loncat ke slide"></select>
+        <button class="nav" id="next" aria-label="Berikutnya">→</button>
+      </footer>
+    </div>
+
+    <script>
+      /* ---------- Karakter kartun: pasang SVG ke placeholder ---------- */
+      document.querySelectorAll(".ch").forEach((el) => {
+        const n = ["robot", "kid", "girl"].find((x) => el.classList.contains(x));
+        if (n) el.innerHTML = '<svg viewBox="0 0 120 150" aria-hidden="true"><use href="#' + n + '"/></svg>';
+      });
+
+      /* ---------- Data kuis (edit/tambah soal di sini) ----------
+   jawaban = nomor indeks pilihan yang benar (mulai dari 0) */
+      const soal = [
+        {
+          tanya: "Apa yang dimaksud dengan kolaborasi?",
+          pilihan: [
+            "Bekerja sendirian agar cepat selesai",
+            "Kerja sama beberapa pihak dengan tujuan yang sama, meskipun perannya berbeda",
+            "Menyerahkan seluruh pekerjaan kepada KA",
+            "Berlomba mencari siapa yang paling hebat",
+          ],
+          jawaban: 1,
+          penjelasan:
+            "Kolaborasi adalah kerja sama beberapa pihak dengan tujuan yang sama meskipun perannya berbeda-beda.",
+        },
+        {
+          tanya: "Menurut Topol (2019), KA sebaiknya dipandang sebagai ...",
+          pilihan: [
+            "pengganti manusia",
+            "penguat kecerdasan manusia",
+            "ancaman bagi kreativitas",
+            "alat yang tidak perlu diawasi",
+          ],
+          jawaban: 1,
+          penjelasan: "KA bukan pengganti manusia, tetapi penguat dari kecerdasan manusia itu sendiri.",
+        },
+        {
+          tanya: "Dalam konsep kolaborasi manusia dan KA, siapa yang menentukan tujuan dan arah konten?",
+          pilihan: ["KA sepenuhnya", "Manusia", "Platform media sosial", "Algoritma"],
+          jawaban: 1,
+          penjelasan: "Langkah pertama kolaborasi: manusia menentukan tujuan. KA membantu mengembangkan ide.",
+        },
+        {
+          tanya: "Manakah yang termasuk kekuatan utama manusia dalam kolaborasi dengan KA?",
+          pilihan: [
+            "Pengolahan data besar",
+            "Otomatisasi tugas berulang",
+            "Empati dan pemahaman nilai budaya",
+            "Kecepatan teknis",
+          ],
+          jawaban: 2,
+          penjelasan: "Kreativitas, empati, intuisi, pemahaman konteks, dan nilai budaya adalah kekuatan manusia.",
+        },
+        {
+          tanya: "Manakah yang BUKAN prinsip penggunaan KA menurut Stuart Russell?",
+          pilihan: [
+            "Selalu mengikuti dan menghormati tujuan manusia",
+            "Tidak diberi otonomi berlebihan tanpa memperhatikan nilai manusia",
+            "Terbuka terhadap masukan dan terus belajar dari manusia",
+            "Bebas bertindak sepenuhnya tanpa kendali manusia",
+          ],
+          jawaban: 3,
+          penjelasan: "KA tidak boleh diberi otonomi berlebihan tanpa memperhatikan nilai-nilai manusia.",
+        },
+        {
+          tanya: "Model Factory pada kolaborasi manusia dan KA paling cocok untuk ...",
+          pilihan: [
+            "Keputusan akhir yang butuh intuisi",
+            "Pekerjaan seni yang unik",
+            "Konseling personal",
+            "Tugas berulang dan massal",
+          ],
+          jawaban: 3,
+          penjelasan: "Model Factory berfokus pada tugas berulang & massal, otomatisasi, dan rekomendasi cepat.",
+        },
+        {
+          tanya: "Pada Model Artisan, keputusan akhir berada di tangan ...",
+          pilihan: ["KA", "Manusia", "Pengguna anonim", "Sistem otomatis"],
+          jawaban: 1,
+          penjelasan: "Model Artisan: KA menjadi asisten profesional, keputusan akhir tetap di tangan manusia.",
+        },
+        {
+          tanya: "Contoh pekerjaan pada Kuadran 4 (tanpa empati + optimasi) menurut Kai-Fu Lee adalah ...",
+          pilihan: [
+            "Guru dan konselor",
+            "Customer service yang menangani masalah rumit",
+            "Logistik otomatis, seperti mengatur rute pengiriman barang",
+            "Perawat",
+          ],
+          jawaban: 2,
+          penjelasan:
+            "Kuadran 4 tidak membutuhkan empati, yang penting efisien, misalnya analisis data besar dan logistik otomatis.",
+        },
+        {
+          tanya: "Alat KA yang memungkinkan kamu mengedit audio seperti mengedit teks adalah ...",
+          pilihan: ["Grammarly", "Descript", "Canva Magic Edit", "Adobe Firefly"],
+          jawaban: 1,
+          penjelasan: "Descript memungkinkan pengeditan audio seperti mengedit teks.",
+        },
+        {
+          tanya: "Alat yang dapat menghasilkan gambar dari perintah teks (text-to-image) adalah ...",
+          pilihan: ["Auphonic", "Kapwing", "Adobe Firefly", "Google Docs"],
+          jawaban: 2,
+          penjelasan: "Adobe Firefly menghasilkan gambar dari perintah teks.",
+        },
+        {
+          tanya: "Tindakan yang sesuai dengan etika dan hak cipta dalam produksi konten adalah ...",
+          pilihan: [
+            "Memakai karya orang lain tanpa izin agar cepat",
+            "Menghapus nama pembuat karya",
+            "Menyebutkan sumber dan memahami lisensi karya",
+            "Menyebarkan informasi tanpa dicek kebenarannya",
+          ],
+          jawaban: 2,
+          penjelasan: "Hargai karya orang lain, jauhi plagiarisme, pahami lisensi, dan jaga etika representasi.",
+        },
+        {
+          tanya: "Berapa jumlah anggota kelompok pada proyek kampanye digital?",
+          pilihan: ["1–2 orang", "3–5 orang", "6–8 orang", "Bebas, tanpa batas"],
+          jawaban: 1,
+          penjelasan: "Proyek dikerjakan berkelompok 3–5 orang.",
+        },
+        {
+          tanya: "Tahap ke-3 pada proyek kampanye digital adalah ...",
+          pilihan: ["Observasi & ideasi", "Diskusi & perencanaan", "Produksi & iterasi", "Pembagian peran & prompt"],
+          jawaban: 3,
+          penjelasan:
+            "Urutan: observasi & ideasi → diskusi & perencanaan → pembagian peran & prompt → produksi & iterasi → publikasi & presentasi.",
+        },
+        {
+          tanya: "Dalam diseminasi konten digital, tugas yang dilakukan manusia adalah ...",
+          pilihan: [
+            "Menentukan platform dan menyesuaikan bahasa",
+            "Menghitung jangkauan secara otomatis",
+            "Memberi rekomendasi waktu unggah",
+            "Membuat draf caption otomatis",
+          ],
+          jawaban: 0,
+          penjelasan:
+            "Manusia menentukan platform, menyesuaikan bahasa, dan mengevaluasi dampak edukatif. KA membantu waktu unggah, caption, dan analisis jangkauan.",
+        },
+        {
+          tanya: "Pesan utama dari materi kolaborasi manusia dan KA adalah ...",
+          pilihan: [
+            "KA akan menggantikan manusia sepenuhnya",
+            "Manusia tidak perlu lagi berkreasi",
+            "Bukan siapa yang lebih hebat, tetapi bagaimana keduanya bekerja bersama",
+            "Konten terbaik hanya dibuat oleh KA",
+          ],
+          jawaban: 2,
+          penjelasan: "Kekuatan manusia dan KA saling melengkapi; keputusan akhir dan nilai tetap di tangan manusia.",
+        },
+      ];
+
+      /* ---------- Data game etika ---------- */
+      const kasus = [
+        {
+          t: "Kamu memakai foto dari internet untuk poster kampanye tanpa mencantumkan sumbernya.",
+          ok: false,
+          p: "Tidak boleh. Selalu sebutkan sumber dan beri kredit yang tepat pada karya yang digunakan.",
+        },
+        {
+          t: "Kamu memakai gambar berlisensi Creative Commons dan mengikuti ketentuan lisensinya.",
+          ok: true,
+          p: "Boleh. Creative Commons memperbolehkan penggunaan karya selama mengikuti ketentuan yang berlaku.",
+        },
+        {
+          t: "Kamu memasang musik populer di videomu tanpa izin pemilik hak cipta.",
+          ok: false,
+          p: "Tidak boleh. Memakai musik, video, atau gambar tanpa izin yang sah adalah pelanggaran.",
+        },
+        {
+          t: "Kamu membagikan video viral yang belum dicek kebenarannya.",
+          ok: false,
+          p: "Tidak boleh. Menyebarkan hoaks melanggar etika representasi. Periksa dulu kebenarannya.",
+        },
+        {
+          t: "Kamu meminta izin pemilik foto, lalu mencantumkan namanya sebagai kredit di poster kampanyemu.",
+          ok: true,
+          p: "Boleh. Meminta izin dan memberi kredit adalah bentuk menghargai karya orang lain.",
+        },
+        {
+          t: "Kamu mengunggah foto temanmu di kampanye tanpa menanyakan izinnya.",
+          ok: false,
+          p: "Tidak boleh. Hormati privasi individu; konten tidak boleh melanggar privasi.",
+        },
+      ];
+
+      /* ---------- Navigasi slide ---------- */
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const counter = document.getElementById("counter"),
+        bar = document.getElementById("progressBar");
+      const prevBtn = document.getElementById("prev"),
+        nextBtn = document.getElementById("next"),
+        jump = document.getElementById("jump");
+      let current = 0;
+      slides.forEach((s, i) => {
+        const o = document.createElement("option");
+        o.value = i;
+        o.textContent = i + 1 + ". " + (s.dataset.title || "Slide " + (i + 1));
+        jump.appendChild(o);
+      });
+      jump.addEventListener("change", () => goTo(Number(jump.value)));
+      function goTo(n) {
+        if (n < 0 || n >= slides.length) return;
+        current = n;
+        slides.forEach((s, i) => {
+          s.classList.toggle("active", i === n);
+          s.classList.toggle("before", i < n);
+        });
+        slides[n].scrollTop = 0;
+        counter.textContent = n + 1 + " / " + slides.length;
+        bar.style.width = ((n + 1) / slides.length) * 100 + "%";
+        prevBtn.disabled = n === 0;
+        nextBtn.disabled = n === slides.length - 1;
+        jump.value = n;
+      }
+      prevBtn.addEventListener("click", () => goTo(current - 1));
+      nextBtn.addEventListener("click", () => goTo(current + 1));
+      document
+        .querySelectorAll("[data-go='next']")
+        .forEach((b) => b.addEventListener("click", () => goTo(current + 1)));
+      document.addEventListener("keydown", (e) => {
+        if (["TEXTAREA", "INPUT", "SELECT"].includes(e.target.tagName)) return;
+        if (e.key === "ArrowRight") goTo(current + 1);
+        if (e.key === "ArrowLeft") goTo(current - 1);
+      });
+      let startX = null;
+      const stage = document.getElementById("stage");
+      stage.addEventListener(
+        "touchstart",
+        (e) => {
+          startX = e.touches[0].clientX;
+        },
+        { passive: true },
+      );
+      stage.addEventListener("touchend", (e) => {
+        if (startX === null) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 90 && !["TEXTAREA"].includes(e.target.tagName)) goTo(current + (dx < 0 ? 1 : -1));
+        startX = null;
+      });
+
+      /* ---------- Komponen interaktif ---------- */
+      slides.forEach((slide) => {
+        const box = slide.querySelector(".info-box");
+        if (!box) return;
+        const items = slide.querySelectorAll(".clickable");
+        items.forEach((item) => {
+          item.addEventListener("click", () => {
+            items.forEach((x) => x.classList.remove("active"));
+            item.classList.add("active");
+            box.querySelector(".info-title").textContent = item.dataset.label || item.textContent.trim();
+            box.querySelector(".info-text").textContent = item.dataset.info || "";
+            box.classList.remove("filled");
+            void box.offsetWidth;
+            box.classList.add("filled");
+          });
+        });
+      });
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const slide = tab.closest(".slide");
+          slide.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+          slide.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+          tab.classList.add("active");
+          slide.querySelector("#" + tab.dataset.tab).classList.add("active");
+        });
+      });
+      document
+        .querySelectorAll(".flip")
+        .forEach((f) => f.addEventListener("click", () => f.classList.toggle("flipped")));
+      document
+        .querySelectorAll(".expand")
+        .forEach((e) => e.addEventListener("click", () => e.classList.toggle("open")));
+      document.querySelectorAll(".check-step").forEach((c) => {
+        c.addEventListener("click", () => {
+          c.classList.toggle("done");
+          const s = c.closest(".slide"),
+            n = s.querySelector(".doneCount");
+          if (n) n.textContent = s.querySelectorAll(".check-step.done").length;
+        });
+      });
+      document.querySelectorAll(".clickable,.flip,.expand,.check-step").forEach((el) => {
+        el.setAttribute("tabindex", "0");
+        el.setAttribute("role", "button");
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            el.click();
+          }
+        });
+      });
+
+      /* ---------- Refleksi ---------- */
+      const refl = [
+        "Apa hal baru yang kamu pelajari dari materi ini?",
+        "Bagian mana dari proses kolaborasi dengan KA yang paling kamu minati? Jelaskan alasannya!",
+        "Apa tantangan yang kamu alami saat bekerja bersama KA?",
+        "Bagaimana perasaanmu setelah menyelesaikan proyek kolaborasi manusia dan KA?",
+        "Menurutmu, apa kelebihan dan kekurangan kolaborasi antara manusia dan KA dalam produksi konten digital?",
+        "Apa nilai penting yang kamu pelajari dari kolaborasi ini? (misalnya komunikasi, kreativitas, tanggung jawab)",
+        "Bagaimana kamu melihat peran KA dalam kehidupanmu ke depan, di sekolah maupun di luar sekolah?",
+      ];
+      const reflBox = document.getElementById("reflect");
+      refl.forEach((q, i) => {
+        const d = document.createElement("div");
+        d.className = "card";
+        d.innerHTML = "<b>" + (i + 1) + ". " + q + '</b><textarea placeholder="Tulis jawabanmu di sini..."></textarea>';
+        reflBox.appendChild(d);
+      });
+      document.getElementById("copyRef").addEventListener("click", () => {
+        const teks = Array.from(reflBox.children)
+          .map((d, i) => i + 1 + ". " + refl[i] + "\n" + d.querySelector("textarea").value)
+          .join("\n\n");
+        const msg = document.getElementById("copyMsg");
+        try {
+          navigator.clipboard.writeText(teks).then(
+            () => {
+              msg.textContent = "Jawaban tersalin ✔";
+            },
+            () => {
+              msg.textContent = "Gagal menyalin. Salin manual dari kotak jawaban.";
+            },
+          );
+        } catch (e) {
+          msg.textContent = "Gagal menyalin. Salin manual dari kotak jawaban.";
+        }
+      });
+
+      /* ---------- Game: Boleh atau Tidak? ---------- */
+      const gameBox = document.getElementById("game");
+      let gi = 0,
+        gs = 0;
+      function gameIntro() {
+        gameBox.innerHTML =
+          '<div class="result"><div class="scene" style="min-height:150px"><i class="ch kid"></i><i class="ch robot"></i></div><h2>Game: <span class="grad">Boleh atau Tidak?</span></h2><p class="lead">Ada ' +
+          kasus.length +
+          ' situasi. Putuskan apakah tindakan itu sesuai etika dan hak cipta.</p><button class="btn" id="gStart">Mulai Game</button></div>';
+        attachChars(gameBox);
+        document.getElementById("gStart").addEventListener("click", () => {
+          gi = 0;
+          gs = 0;
+          gameQ();
+        });
+      }
+      function gameQ() {
+        const k = kasus[gi];
+        gameBox.innerHTML =
+          '<div class="q-top"><span>Situasi ' +
+          (gi + 1) +
+          " dari " +
+          kasus.length +
+          "</span><span>Skor: " +
+          gs +
+          '</span></div><div class="q-bar"><div style="width:' +
+          (gi / kasus.length) * 100 +
+          '%"></div></div><p class="q-text">' +
+          k.t +
+          '</p><div class="options"><button class="opt" data-v="1"><span class="key">✔</span><span>Boleh</span></button><button class="opt" data-v="0"><span class="key">✘</span><span>Tidak boleh</span></button></div><div id="gfb"></div><div id="gnext"></div>';
+        gameBox.querySelectorAll(".opt").forEach((b) =>
+          b.addEventListener("click", () => {
+            const v = b.dataset.v === "1",
+              benar = v === k.ok;
+            if (benar) gs++;
+            gameBox.querySelectorAll(".opt").forEach((x) => {
+              x.disabled = true;
+              if ((x.dataset.v === "1") === k.ok) x.classList.add("correct");
+              else if (x === b) x.classList.add("wrong");
+            });
+            document.getElementById("gfb").innerHTML =
+              '<div class="feedback ' +
+              (benar ? "ok" : "no") +
+              '"><b>' +
+              (benar ? "✅ Tepat!" : "❌ Belum tepat.") +
+              "</b> " +
+              k.p +
+              "</div>";
+            const last = gi === kasus.length - 1;
+            document.getElementById("gnext").innerHTML =
+              '<button class="btn" id="gn">' + (last ? "Lihat Skor" : "Berikutnya →") + "</button>";
+            document.getElementById("gn").addEventListener("click", () => {
+              if (last) gameEnd();
+              else {
+                gi++;
+                gameQ();
+              }
+            });
+          }),
+        );
+      }
+      function gameEnd() {
+        const msg =
+          gs === kasus.length
+            ? "Sempurna! Kamu paham etika digital 🎉"
+            : gs >= kasus.length - 2
+              ? "Bagus! Sedikit lagi 👍"
+              : "Pelajari lagi slide etika ya 💪";
+        gameBox.innerHTML =
+          '<div class="result"><div class="scene" style="min-height:150px"><i class="ch girl"></i><i class="ch robot"></i></div><h2>Skor: <span class="grad">' +
+          gs +
+          " / " +
+          kasus.length +
+          '</span></h2><p class="lead">' +
+          msg +
+          '</p><div><button class="btn" id="gAgain">Main Lagi</button> <button class="btn ghost" data-go2="1" id="gNext">Lanjut ke Proyek →</button></div></div>';
+        attachChars(gameBox);
+        document.getElementById("gAgain").addEventListener("click", () => {
+          gi = 0;
+          gs = 0;
+          gameQ();
+        });
+        document.getElementById("gNext").addEventListener("click", () => goTo(current + 1));
+      }
+      function attachChars(root) {
+        root.querySelectorAll(".ch").forEach((el) => {
+          const n = ["robot", "kid", "girl"].find((x) => el.classList.contains(x));
+          if (n) el.innerHTML = '<svg viewBox="0 0 120 150" aria-hidden="true"><use href="#' + n + '"/></svg>';
+        });
+      }
+
+      /* ---------- Kuis ---------- */
+      const quizBox = document.getElementById("quiz"),
+        huruf = ["A", "B", "C", "D", "E"];
+      let idx = 0,
+        skor = 0,
+        jawabanUser = [];
+      function mulaiKuis() {
+        idx = 0;
+        skor = 0;
+        jawabanUser = [];
+        tampilSoal();
+      }
+      function tampilIntro() {
+        quizBox.innerHTML =
+          '<div class="result"><div class="scene" style="min-height:170px"><i class="ch kid"></i><i class="ch robot"></i><i class="ch girl"></i></div><h2>Kuis <span class="grad">Pemahaman</span></h2><p class="lead">' +
+          soal.length +
+          ' soal pilihan ganda tentang kolaborasi manusia dan KA. Kamu akan langsung melihat jawaban dan penjelasannya.</p><button class="btn" id="startQuiz">Mulai Kuis</button></div>';
+        attachChars(quizBox);
+        document.getElementById("startQuiz").addEventListener("click", mulaiKuis);
+      }
+      function tampilSoal() {
+        const s = soal[idx];
+        quizBox.innerHTML =
+          '<div class="q-top"><span>Soal ' +
+          (idx + 1) +
+          " dari " +
+          soal.length +
+          "</span><span>Skor: " +
+          skor +
+          '</span></div><div class="q-bar"><div style="width:' +
+          (idx / soal.length) * 100 +
+          '%"></div></div><p class="q-text">' +
+          s.tanya +
+          '</p><div class="options">' +
+          s.pilihan
+            .map(
+              (p, i) =>
+                '<button class="opt" data-i="' +
+                i +
+                '"><span class="key">' +
+                huruf[i] +
+                "</span><span>" +
+                p +
+                "</span></button>",
+            )
+            .join("") +
+          '</div><div id="fb"></div><div id="nextWrap"></div>';
+        quizBox
+          .querySelectorAll(".opt")
+          .forEach((btn) => btn.addEventListener("click", () => jawab(Number(btn.dataset.i))));
+      }
+      function jawab(i) {
+        const s = soal[idx],
+          benar = i === s.jawaban;
+        if (benar) skor++;
+        jawabanUser.push(i);
+        quizBox.querySelectorAll(".opt").forEach((btn, n) => {
+          btn.disabled = true;
+          if (n === s.jawaban) btn.classList.add("correct");
+          if (n === i && !benar) btn.classList.add("wrong");
+        });
+        document.getElementById("fb").innerHTML =
+          '<div class="feedback ' +
+          (benar ? "ok" : "no") +
+          '"><b>' +
+          (benar ? "✅ Benar!" : "❌ Kurang tepat.") +
+          "</b> " +
+          s.penjelasan +
+          "</div>";
+        const last = idx === soal.length - 1;
+        document.getElementById("nextWrap").innerHTML =
+          '<button class="btn" id="nextQ">' + (last ? "Lihat Hasil" : "Soal Berikutnya →") + "</button>";
+        document.getElementById("nextQ").addEventListener("click", () => {
+          if (last) tampilHasil();
+          else {
+            idx++;
+            tampilSoal();
+          }
+        });
+      }
+      function tampilHasil() {
+        const pct = Math.round((skor / soal.length) * 100);
+        let pesan = "Terus berlatih, ulangi materinya ya! 💪";
+        if (pct >= 90) pesan = "Luar biasa! Kamu menguasai materi ini 🎉";
+        else if (pct >= 70) pesan = "Bagus! Sedikit lagi sempurna 👍";
+        else if (pct >= 50) pesan = "Lumayan, pelajari lagi bagian yang belum tepat.";
+        quizBox.innerHTML =
+          '<div class="result"><h2>Hasil <span class="grad">Kuis</span></h2><div class="score-ring" style="--pct:' +
+          pct +
+          '%">' +
+          pct +
+          '</div><p class="lead">Benar ' +
+          skor +
+          " dari " +
+          soal.length +
+          " soal. " +
+          pesan +
+          '</p><div><button class="btn" id="retry">Ulangi Kuis</button> <button class="btn ghost" id="toStart">Kembali ke Awal Materi</button></div><div class="review"><p class="label">Pembahasan</p>' +
+          soal
+            .map((s, n) => {
+              const ok = jawabanUser[n] === s.jawaban;
+              return (
+                '<div class="card"><b>' +
+                (n + 1) +
+                ". " +
+                s.tanya +
+                '</b><br><span class="' +
+                (ok ? "ok-t" : "no-t") +
+                '">' +
+                (ok ? "✔ Benar" : "✘ Jawabanmu: " + s.pilihan[jawabanUser[n]]) +
+                "</span><br>Jawaban benar: <b>" +
+                s.pilihan[s.jawaban] +
+                "</b></div>"
+              );
+            })
+            .join("") +
+          "</div></div>";
+        document.getElementById("retry").addEventListener("click", mulaiKuis);
+        document.getElementById("toStart").addEventListener("click", () => goTo(0));
+      }
+
+      gameIntro();
+      tampilIntro();
+      goTo(0);
+    </script>
+  </body>
+</html>
